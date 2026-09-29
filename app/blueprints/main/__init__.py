@@ -2,6 +2,9 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from ...models import Post, Program, Message
 from ...forms import ContactForm
 from ...extensions import db
+from ...models import Post, Program, Message, User, Application, Order, Donation, Product, Resource
+
+
 
 main_bp = Blueprint("main", __name__, template_folder="../../templates/main")
 
@@ -27,3 +30,26 @@ def contact():
         flash("Thanks! We'll get back to you soon.", "success")
         return redirect(url_for("main.contact"))
     return render_template("main/contact.html", form=form)
+
+@main_bp.route("/impact")
+def impact():
+    from sqlalchemy import func
+    from ...settings_utils import get_all_settings
+    site = get_all_settings()
+
+    stats = {
+        "trained":   site.get("impact_trained", "13"),
+        "practical": site.get("impact_practical", "90"),
+        "kits":      site.get("impact_kits", "10"),
+        "target":    site.get("impact_target", "80"),
+        "users":     User.query.count(),
+        "applications": Application.query.count(),
+        "enrolled":  Application.query.filter_by(status="enrolled").count(),
+        "programs":  Program.query.count(),
+        "products":  Product.query.count(),
+        "orders":    Order.query.count(),
+        "donations_total": float(
+            db.session.query(func.coalesce(func.sum(Donation.amount), 0)).scalar()
+        ),
+    }
+    return render_template("main/impact.html", stats=stats, site=site)

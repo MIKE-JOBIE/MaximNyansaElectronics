@@ -8,6 +8,13 @@ from ...forms import ProgramForm, ProductForm, ResourceForm
 from ...extensions import db
 from ...utils import slugify, save_upload
 from sqlalchemy import func
+from .settings_routes import register_settings_routes
+from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm
+from .bulk_routes import register_bulk_routes
+
+from flask import send_file
+from io import BytesIO
+from ...certificate import generate_certificate
 
 admin_bp = Blueprint("admin", __name__, template_folder="../../templates/admin")
 
@@ -240,3 +247,83 @@ def donations():
 def donation_verify(did):
     d = Donation.query.get_or_404(did); d.verified = True; db.session.commit()
     return redirect(url_for("admin.donations"))
+
+register_settings_routes(admin_bp)
+
+# --- NEWS / BLOG ---
+@admin_bp.route("/news")
+@login_required
+@admin_required
+def news():
+    posts = Post.query.order_by(Post.published_at.desc()).all()
+    return render_template("admin/news.html", posts=posts)
+
+
+@admin_bp.route("/news/new", methods=["GET", "POST"])
+@login_required
+@admin_required
+def news_new():
+    form = PostForm()
+    if form.validate_on_submit():
+        img = save_upload(form.cover_image.data, "post_")
+        p = Post(title=form.title.data, slug=slugify(form.title.data),
+                 body=form.body.data, cover_image=img)
+        db.session.add(p); db.session.commit()
+        flash("Post published.", "success")
+        return redirect(url_for("admin.news"))
+    return render_template("admin/news_form.html", form=form, post=None)
+
+
+@admin_bp.route("/news/<int:pid>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def news_edit(pid):
+    p = Post.query.get_or_404(pid)
+    form = PostForm(obj=p)
+    if form.validate_on_submit():
+        p.title = form.title.data
+        p.slug  = slugify(form.title.data)
+        p.body  = form.body.data
+        img = save_upload(form.cover_image.data, "post_")
+        if img: p.cover_image = img
+        db.session.commit()
+        flash("Post updated.", "success")
+        return redirect(url_for("admin.news"))
+    return render_template("admin/news_form.html", form=form, post=p)
+
+
+@admin_bp.route("/news/<int:pid>/delete", methods=["POST"])
+@login_required
+@admin_required
+def news_delete(pid):
+    p = Post.query.get_or_404(pid)
+    db.session.delete(p); db.session.commit()
+    flash("Post deleted.", "info")
+    return redirect(url_for("admin.news"))
+
+# --- CERTIFICATES ---
+@admin_bp.route("/programs/<int:pid>/graduates")
+@login_required
+@admin_required
+def program_graduates(pid):
+    p = Program.query.get_or_404(pid)
+    grads = Application.query.filter_by(program_id=pid, status="enrolled")\
+                             .order_by(Application.submitted_at).all()
+    return render_template("admin/graduates.html", program=p, graduates=grads)
+
+
+@admin_bp.route("/applications/<int:aid>/certificate")
+@login_required
+@admin_required
+def certificate_download(aid):
+    a = Application.query.get_or_404(aid)
+    if a.status not in ("enrolled", "approved"):
+        flash("Certificate only available for approved or enrolled trainees.", "warning")
+        return redirect(url_for("admin.applications"))
+
+    pdf_bytes = generate_certificate(a.applicant.full_name, a.program.title)
+    filename = f"certificate_{a.id}_{a.applicant.last_name or 'trainee'}.pdf"
+    return send_file(BytesIO(pdf_bytes), mimetype="application/pdf",
+                     as_attachment=True, download_name=filename)
+
+register_bulk_routes(admin_bp)

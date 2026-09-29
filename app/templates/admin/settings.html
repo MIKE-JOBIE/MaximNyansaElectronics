@@ -1,0 +1,52 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>Site Settings</h1></div>
+
+<form method="POST" class="mn-form" style="margin-top:0;max-width:820px">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <h3 style="font-family:'Bebas Neue';font-size:1.4rem;margin-top:0">Brand</h3>
+  <label>Brand Name</label>
+  <input name="field_brand_name" value="{{ settings.brand_name }}">
+
+  <label>Tagline</label>
+  <input name="field_brand_tagline" value="{{ settings.brand_tagline }}">
+
+  <h3 style="font-family:'Bebas Neue';font-size:1.4rem;margin-top:1.5rem">Contact</h3>
+  <label>Phone</label>
+  <input name="field_brand_phone" value="{{ settings.brand_phone }}">
+
+  <label>Email</label>
+  <input name="field_brand_email" value="{{ settings.brand_email }}">
+
+  <label>Address</label>
+  <input name="field_brand_address" value="{{ settings.brand_address }}">
+
+  <h3 style="font-family:'Bebas Neue';font-size:1.4rem;margin-top:1.5rem">Announcement Banner</h3>
+  <label style="display:flex;align-items:center;gap:.5rem">
+    <input type="checkbox" name="announcement_active" {% if settings.announcement_active == 'true' %}checked{% endif %} style="width:auto">
+    Show banner site-wide
+  </label>
+
+  <label>Banner Message</label>
+  <textarea name="field_announcement_banner" placeholder="e.g. New cohort starts November 15 — Apply now!">{{ settings.announcement_banner }}</textarea>
+
+  <h3 style="font-family:'Bebas Neue';font-size:1.4rem;margin-top:1.5rem">Impact Metrics (shown on home + impact page)</h3>
+  <div class="row">
+    <div class="col-md-6"><label>Trainees Trained</label><input name="field_impact_trained" value="{{ settings.impact_trained }}"></div>
+    <div class="col-md-6"><label>% Practical Learning</label><input name="field_impact_practical" value="{{ settings.impact_practical }}"></div>
+    <div class="col-md-6"><label>Starter Kits Issued</label><input name="field_impact_kits" value="{{ settings.impact_kits }}"></div>
+    <div class="col-md-6"><label>Youth per Year Target</label><input name="field_impact_target" value="{{ settings.impact_target }}"></div>
+  </div>
+
+  <h3 style="font-family:'Bebas Neue';font-size:1.4rem;margin-top:1.5rem">Social Links</h3>
+  <label>Facebook URL</label><input name="field_social_facebook" value="{{ settings.social_facebook }}">
+  <label>LinkedIn URL</label><input name="field_social_linkedin" value="{{ settings.social_linkedin }}">
+  <label>Instagram URL</label><input name="field_social_instagram" value="{{ settings.social_instagram }}">
+  <label>YouTube URL</label><input name="field_social_youtube" value="{{ settings.social_youtube }}">
+
+  <div style="margin-top:1.5rem">
+    <button class="btn-mn-primary" type="submit">Save Settings</button>
+  </div>
+</form>
+{% endblock %}

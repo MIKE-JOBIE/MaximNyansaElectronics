@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Our Impact — {{ brand_name }}{% endblock %}
+{% block description %}See the measurable impact of Maxim Nyansa Electronics SL — trainees, programs, kits, and community reach across Sierra Leone.{% endblock %}
+{% block content %}
+
+<section class="mn-hero" style="min-height:50vh">
+  <div class="container" style="position:relative">
+    <div class="col-lg-7">
+      <span style="display:inline-block;background:#8DC63F;color:#fff;padding:.25rem .8rem;border-radius:999px;font-family:'Oswald';font-size:.75rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem">Impact</span>
+      <h1>Change You Can <span style="color:#8DC63F">Count</span></h1>
+      <p class="lead">Every trainee, every kit, every repaired device — measurable progress toward a stronger, safer Sierra Leone.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Headline Numbers</div>
+      <h2>Where We Stand Today</h2>
+    </div>
+    <div class="row" style="text-align:center">
+      <div class="col-md-3"><div class="mn-card" style="padding:2rem">
+        <div class="counter-num" data-target="{{ stats.trained }}">0</div>
+        <div class="counter-lbl">Trainees Trained</div>
+      </div></div>
+      <div class="col-md-3"><div class="mn-card" style="padding:2rem">
+        <div class="counter-num" data-target="{{ stats.practical }}" data-suffix="%">0</div>
+        <div class="counter-lbl">Practical Learning</div>
+      </div></div>
+      <div class="col-md-3"><div class="mn-card" style="padding:2rem">
+        <div class="counter-num" data-target="{{ stats.kits }}">0</div>
+        <div class="counter-lbl">Starter Kits Issued</div>
+      </div></div>
+      <div class="col-md-3"><div class="mn-card" style="padding:2rem">
+        <div class="counter-num" data-target="{{ stats.target }}">0</div>
+        <div class="counter-lbl">Yearly Target</div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Platform Activity</div>
+      <h2>What's Happening Now</h2>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="mn-card" style="padding:1.5rem">
+          <h5>Training</h5>
+          <table class="mn-table" style="box-shadow:none">
+            <tbody>
+              <tr><td>Registered Users</td><td style="text-align:right"><strong>{{ stats.users }}</strong></td></tr>
+              <tr><td>Applications Received</td><td style="text-align:right"><strong>{{ stats.applications }}</strong></td></tr>
+              <tr><td>Currently Enrolled</td><td style="text-align:right"><strong>{{ stats.enrolled }}</strong></td></tr>
+              <tr><td>Active Programs</td><td style="text-align:right"><strong>{{ stats.programs }}</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="mn-card" style="padding:1.5rem">
+          <h5>Enterprise</h5>
+          <table class="mn-table" style="box-shadow:none">
+            <tbody>
+              <tr><td>Products in Shop</td><td style="text-align:right"><strong>{{ stats.products }}</strong></td></tr>
+              <tr><td>Orders Placed</td><td style="text-align:right"><strong>{{ stats.orders }}</strong></td></tr>
+              <tr><td>Donations Pledged</td><td style="text-align:right"><strong>Le {{ "{:,.0f}".format(stats.donations_total) }}</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container text-center">
+    <h2>Help Us Reach 80 Youth This Year</h2>
+    <p class="text-muted" style="max-width:640px;margin:.5rem auto 1.5rem">
+      Every contribution trains a young person with marketable skills.
+    </p>
+    <a href="{{ url_for('donors.index') }}" class="btn-mn-primary" style="padding:.85rem 2.2rem;font-size:1rem">Donate Now</a>
+    <a href="{{ url_for('training.apply') }}" class="btn-mn-outline" style="padding:.85rem 2.2rem;font-size:1rem;margin-left:.5rem">Apply for Training</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Animated counters
+  document.addEventListener("DOMContentLoaded", () => {
+    const counters = document.querySelectorAll(".counter-num");
+    const animate = (el) => {
+      const target = parseInt(el.dataset.target, 10) || 0;
+      const suffix = el.dataset.suffix || "";
+      const duration = 1400;
+      const start = performance.now();
+      const step = (now) => {
+        const t = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.floor(target * eased).toLocaleString() + suffix;
+        if (t < 1) requestAnimationFrame(step);
+        else el.textContent = target.toLocaleString() + suffix;
+      };
+      requestAnimationFrame(step);
+    };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animate(e.target); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.3 });
+    counters.forEach((c) => io.observe(c));
+  });
+</script>
+{% endblock %}

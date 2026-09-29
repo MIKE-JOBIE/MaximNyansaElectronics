@@ -1,0 +1,28 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header">
+  <h1>News & Blog</h1>
+  <a href="{{ url_for('admin.news_new') }}" class="btn-mn-primary btn-sm">+ New Post</a>
+</div>
+<table class="mn-table">
+  <thead><tr><th>Title</th><th>Published</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for p in posts %}
+    <tr>
+      <td>{{ p.title }}</td>
+      <td>{{ p.published_at.strftime('%Y-%m-%d') }}</td>
+      <td>
+        <a class="btn-mn-outline btn-sm" href="{{ url_for('admin.news_edit', pid=p.id) }}">Edit</a>
+        <form method="POST" action="{{ url_for('admin.news_delete', pid=p.id) }}" style="display:inline"
+              onsubmit="return confirm('Delete this post?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn-mn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3" class="text-muted">No posts yet. Create one!</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

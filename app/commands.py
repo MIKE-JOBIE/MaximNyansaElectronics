@@ -14,6 +14,10 @@ def register_commands(app):
         admin_email = current_app.config["ADMIN_EMAIL"]
         admin_pass  = current_app.config["ADMIN_PASSWORD"]
 
+        from .settings_utils import seed_default_settings
+        seed_default_settings()
+        click.echo("✔ Site settings seeded")
+
         if not User.query.filter_by(email=admin_email).first():
             u = User(email=admin_email, first_name="Admin", last_name="Maxim", role="admin")
             u.set_password(admin_pass)

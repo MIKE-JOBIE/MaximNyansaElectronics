@@ -99,3 +99,21 @@ class ChangePasswordForm(FlaskForm):
     password = PasswordField("New Password", validators=[DataRequired(), Length(6, 128)])
     confirm  = PasswordField("Confirm New Password", validators=[DataRequired(), EqualTo("password")])
     submit   = SubmitField("Change Password")
+
+class PostForm(FlaskForm):
+    title       = StringField("Title", validators=[DataRequired(), Length(3, 200)])
+    body        = TextAreaField("Body (Markdown-ish)", validators=[DataRequired()])
+    cover_image = FileField("Cover Image (optional)")
+    submit      = SubmitField("Save Post")
+
+
+class BulkEmailForm(FlaskForm):
+    program_id = SelectField("Send to (Program)", coerce=int, validators=[Optional()])
+    status     = SelectField("Filter by status",
+                             choices=[("all","All"),("pending","Pending"),
+                                      ("approved","Approved"),("enrolled","Enrolled"),
+                                      ("rejected","Rejected")],
+                             default="all")
+    subject    = StringField("Subject", validators=[DataRequired(), Length(3, 200)])
+    body       = TextAreaField("Message", validators=[DataRequired(), Length(10, 8000)])
+    submit     = SubmitField("Send Bulk Email")

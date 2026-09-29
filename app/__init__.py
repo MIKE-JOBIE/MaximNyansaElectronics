@@ -39,12 +39,19 @@ def create_app(config_object=None):
     @app.context_processor
     def inject_globals():
         from datetime import datetime
+        from .settings_utils import get_all_settings
+        try:
+            site = get_all_settings()
+        except Exception:
+            site = {}
         return {
             "current_year": datetime.utcnow().year,
-            "brand_name": "Maxim Nyansa Electronics",
-            "brand_phone": "+232 31 950 662",
-            "brand_email": "info@maximnyansa.com",
-            "brand_address": "5C BaiBureh Road, Ferry Junction, Freetown, Sierra Leone",
+            "brand_name":   site.get("brand_name", "Maxim Nyansa Electronics"),
+            "brand_phone":  site.get("brand_phone", "+232 31 950 662"),
+            "brand_email":  site.get("brand_email", "info@maximnyansa.com"),
+            "brand_address":site.get("brand_address", "Freetown, Sierra Leone"),
+            "brand_tagline":site.get("brand_tagline", "Skills Today, Success Tomorrow"),
+            "site": site,
         }
 
     from .commands import register_commands

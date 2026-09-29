@@ -115,3 +115,25 @@
     .badge-80 .num{font-size:1.7rem}
     .badge-80 .lbl{font-size:.6rem}
   }
+
+  /* Announcement banner */
+.mn-announce{
+  background:linear-gradient(90deg,#F5A623,#F5A623);
+  color:#1A1A1A;
+  padding:.55rem 0;
+  text-align:center;
+  font-family:'Oswald',sans-serif;
+  font-weight:500;
+  font-size:.9rem;
+  letter-spacing:.3px;
+}
+.mn-announce strong{margin-right:.4rem}
+
+/* Animated counters */
+.counter-num{font-family:'Bebas Neue';font-size:2.6rem;color:var(--brand-green-dark);line-height:1}
+.counter-lbl{font-family:'Oswald';text-transform:uppercase;font-size:.75rem;color:var(--brand-gray);letter-spacing:1.5px;margin-top:.3rem}
+
+/* Certificate preview block */
+.cert-preview{background:linear-gradient(135deg,#fff,#E8F5D0);border:2px solid #8DC63F;border-radius:8px;padding:2rem;text-align:center;font-family:'Bebas Neue'}
+.cert-preview h2{color:#8DC63F;margin:0}
+.cert-preview p{font-family:'Inter';color:#4A4A4A;margin:.5rem 0 0}

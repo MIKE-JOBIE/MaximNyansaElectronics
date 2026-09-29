@@ -1,0 +1,29 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header">
+  <h1>Graduates — {{ program.title }}</h1>
+  <a href="{{ url_for('admin.programs') }}" class="btn-mn-outline btn-sm">← All Programs</a>
+</div>
+
+{% if graduates %}
+<table class="mn-table">
+  <thead><tr><th>Name</th><th>Email</th><th>Enrolled</th><th>Certificate</th></tr></thead>
+  <tbody>
+    {% for a in graduates %}
+      <tr>
+        <td>{{ a.applicant.full_name }}</td>
+        <td>{{ a.applicant.email }}</td>
+        <td>{{ a.submitted_at.strftime('%Y-%m-%d') }}</td>
+        <td>
+          <a class="btn-mn-primary btn-sm" href="{{ url_for('admin.certificate_download', aid=a.id) }}">
+            Download PDF
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p class="text-muted">No enrolled graduates yet. Approve applications and mark them "enrolled" from the Applications tab.</p>
+{% endif %}
+{% endblock %}

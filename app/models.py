@@ -157,3 +157,28 @@ class PasswordResetToken(db.Model):
     @property
     def is_valid(self):
         return (not self.used) and self.expires_at > datetime.utcnow()
+    
+class SiteSetting(db.Model):
+    __tablename__ = "site_settings"
+    id         = db.Column(db.Integer, primary_key=True)
+    key        = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    value      = db.Column(db.Text, default="")
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    @staticmethod
+    def get(key, default=""):
+        s = SiteSetting.query.filter_by(key=key).first()
+        return s.value if s else default
+
+    @staticmethod
+    def set(key, value):
+        s = SiteSetting.query.filter_by(key=key).first()
+        if s:
+            s.value = str(value)
+        else:
+            db.session.add(SiteSetting(key=key, value=str(value)))
+        db.session.commit()
+
+    @staticmethod
+    def all_dict():
+        return {s.key: s.value for s in SiteSetting.query.all()}

@@ -6,7 +6,10 @@
   <tbody>
   {% for p in programs %}
     <tr><td>{{ p.title }}</td><td><span class="badge-status badge-{{ 'approved' if p.status=='open' else 'pending' }}">{{ p.status }}</span></td><td>{{ p.capacity }}</td><td>{{ p.fee }}</td>
-      <td><a class="btn-mn-outline btn-sm" href="{{ url_for('admin.program_edit', pid=p.id) }}">Edit</a></td></tr>
+      <td>
+        <a class="btn-mn-outline btn-sm" href="{{ url_for('admin.program_edit', pid=p.id) }}">Edit</a>
+        <a class="btn-mn-outline btn-sm" href="{{ url_for('admin.program_graduates', pid=p.id) }}">Graduates</a>
+      </td></tr>
   {% endfor %}
   </tbody>
 </table>

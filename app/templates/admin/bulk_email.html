@@ -1,0 +1,41 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>Bulk Email</h1></div>
+
+<div class="row">
+  <div class="col-md-7">
+    <form method="POST" class="mn-form" style="margin-top:0">
+      {{ form.hidden_tag() }}
+      <div class="section-head"><h2 style="font-size:1.6rem">Compose</h2></div>
+
+      <label>Send To (Program)</label>{{ form.program_id() }}
+      <label>Filter by status</label>{{ form.status() }}
+      <label>Subject</label>{{ form.subject() }}
+      <label>Message</label>{{ form.body(rows=10, style="min-height:220px") }}
+
+      <p class="text-muted" style="font-size:.85rem">
+        💡 Use <code>{{ '{{name}}' }}</code> for the recipient's first name,
+        <code>{{ '{{email}}' }}</code> for their email.
+      </p>
+
+      <div style="margin-top:1rem">
+        <button class="btn-mn-primary" type="submit"
+                onclick="return confirm('Send this message to all matching recipients?');">
+          Send Bulk Email
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-5">
+    <div class="mn-card" style="padding:1.5rem">
+      <h5>Tips</h5>
+      <ul style="font-size:.9rem;padding-left:1.2rem">
+        <li>Filter by program to target a specific cohort.</li>
+        <li>Use "All" status to reach every applicant.</li>
+        <li>Emails are sent one per recipient so each gets a personal copy.</li>
+        <li>If MAIL_USERNAME isn't configured, emails print to the server console (dev mode).</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
