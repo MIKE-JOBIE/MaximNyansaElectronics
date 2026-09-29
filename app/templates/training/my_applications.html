@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">My Training</div><h2>My Applications</h2></div>
+    {% if applications %}
+    <table class="mn-table">
+      <thead><tr><th>Program</th><th>Submitted</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for a in applications %}
+          <tr><td>{{ a.program.title }}</td><td>{{ a.submitted_at.strftime('%Y-%m-%d') }}</td>
+            <td><span class="badge-status badge-{{ a.status }}">{{ a.status }}</span></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="text-muted">You haven't submitted any applications yet. <a href="{{ url_for('training.apply') }}">Apply now</a>.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

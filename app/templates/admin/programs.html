@@ -1,0 +1,13 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>Programs</h1><a href="{{ url_for('admin.program_new') }}" class="btn-mn-primary btn-sm">+ New Program</a></div>
+<table class="mn-table">
+  <thead><tr><th>Title</th><th>Status</th><th>Capacity</th><th>Fee</th><th></th></tr></thead>
+  <tbody>
+  {% for p in programs %}
+    <tr><td>{{ p.title }}</td><td><span class="badge-status badge-{{ 'approved' if p.status=='open' else 'pending' }}">{{ p.status }}</span></td><td>{{ p.capacity }}</td><td>{{ p.fee }}</td>
+      <td><a class="btn-mn-outline btn-sm" href="{{ url_for('admin.program_edit', pid=p.id) }}">Edit</a></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

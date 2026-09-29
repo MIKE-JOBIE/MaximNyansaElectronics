@@ -1,0 +1,23 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>Orders</h1></div>
+<table class="mn-table">
+  <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+    <tr>
+      <td>{{ o.reference }}</td>
+      <td>{{ o.full_name or (o.customer.full_name if o.customer else '—') }}</td>
+      <td>Le {{ "{:,.0f}".format(o.total) }}</td>
+      <td><span class="badge-status badge-{{ o.status }}">{{ o.status }}</span></td>
+      <td>{{ o.created_at.strftime('%Y-%m-%d') }}</td>
+      <td>
+        {% for s in ['paid','shipped','delivered','cancelled'] %}
+          <form method="POST" action="{{ url_for('admin.order_status', oid=o.id, status=s) }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-mn-outline btn-sm">{{ s }}</button></form>
+        {% endfor %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

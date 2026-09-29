@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <form method="POST" class="mn-form">
+      {{ form.hidden_tag() }}
+      <div class="section-head text-center" style="margin-bottom:1rem"><div class="eyebrow">Application</div><h2>Apply for Training</h2></div>
+      <label>Select Program</label>
+      <select name="program_id" required>
+        <option value="">— Choose a program —</option>
+        {% for p in programs %}<option value="{{ p.id }}" {% if selected_program==p.id %}selected{% endif %}>{{ p.title }}</option>{% endfor %}
+      </select>
+      <label>Why do you want to join?</label>{{ form.motivation() }}
+      <label>Highest education</label>{{ form.education() }}
+      <label>Home address</label>{{ form.address() }}
+      <label>Phone</label>{{ form.phone() }}
+      <div style="margin-top:1.2rem">{{ form.submit(class="btn-mn-primary", style="width:100%") }}</div>
+    </form>
+  </div>
+</section>
+{% endblock %}

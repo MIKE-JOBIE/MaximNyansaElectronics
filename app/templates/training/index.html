@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center"><div class="eyebrow">Training Programs</div><h2>Learn a Skill That Pays</h2>
+    <p class="text-muted">3-Month Electronics Repair, Replacement & Maintenance Boot Camp</p></div>
+    <div class="row">
+      {% for p in programs %}
+      <div class="col-md-4">
+        <div class="mn-card">
+          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.jpg') }}">{% endif %}
+          <div class="card-body">
+            <h5>{{ p.title }}</h5>
+            <p class="text-muted" style="font-size:.9rem">{{ p.summary }}</p>
+            <div class="d-flex gap-2 align-items-center" style="margin-top:auto">
+              <span class="badge-status badge-{{ 'approved' if p.status=='open' else 'rejected' }}">{{ p.status }}</span>
+              <a href="{{ url_for('training.program_detail', slug=p.slug) }}" class="btn-mn-outline btn-sm">Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

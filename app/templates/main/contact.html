@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center"><div class="eyebrow">Get in Touch</div><h2>Contact Us</h2></div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="mn-card" style="padding:2rem">
+          <h5>Visit us</h5>
+          <p>{{ brand_address }}</p>
+          <p>📞 {{ brand_phone }}</p>
+          <p>✉️ {{ brand_email }}</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <form method="POST" class="mn-form" style="margin-top:0">
+          {{ form.hidden_tag() }}
+          <label>{{ form.name.label.text }}</label>{{ form.name() }}
+          <label>{{ form.email.label.text }}</label>{{ form.email() }}
+          <label>{{ form.subject.label.text }}</label>{{ form.subject() }}
+          <label>{{ form.message.label.text }}</label>{{ form.message() }}
+          <div style="margin-top:1.2rem">{{ form.submit(class="btn-mn-primary") }}</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

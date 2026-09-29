@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mn-hero">
+  <div class="container" style="position:relative">
+    <div class="col-lg-7">
+      <span style="display:inline-block;background:#8DC63F;color:#fff;padding:.25rem .8rem;border-radius:999px;font-family:'Oswald';font-size:.75rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem">Sierra Leone • Freetown</span>
+      <h1>Hands-on Electronics Training That Builds Futures</h1>
+      <p class="lead mb-4">A 3-month practical boot camp in electronics repair, replacement & maintenance — training up to <strong style="color:#8DC63F">80 youths annually</strong> to become entrepreneurs serving their communities.</p>
+      <a href="{{ url_for('training.apply') }}" class="btn-mn-primary" style="font-size:1rem;padding:.8rem 2rem">Apply Now</a>
+      <a href="{{ url_for('donors.index') }}" class="btn-mn-outline" style="font-size:1rem;padding:.8rem 2rem;color:#fff;border-color:#8DC63F;margin-left:.5rem">Support Us</a>
+    </div>
+    <div class="badge-80"><span class="num">80</span><span class="lbl">YOUTHS / YR</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Our Mission</div>
+      <h2>Equipping Youth With Skills That Matter</h2>
+      <p style="max-width:760px;margin:0 auto;color:#555">To equip young people with in-demand electronics skills, promote self-reliance, fight unemployment, reduce substance abuse and gang-related activities, and build a stronger, safer Sierra Leone.</p>
+    </div>
+  </div>
+</section>
+
+{% if programs %}
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head text-center"><div class="eyebrow">Training Programs</div><h2>Current Cohorts</h2></div>
+    <div class="row">
+      {% for p in programs %}
+      <div class="col-md-4">
+        <div class="mn-card">
+          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}" alt="{{ p.title }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.jpg') }}" alt="">{% endif %}
+          <div class="card-body">
+            <h5>{{ p.title }}</h5>
+            <p class="text-muted" style="font-size:.9rem;margin:0">{{ p.summary }}</p>
+            <a href="{{ url_for('training.program_detail', slug=p.slug) }}" class="btn-mn-outline btn-sm" style="margin-top:auto;align-self:flex-start">Learn more</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="container">
+    <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem">
+      <div class="kpi"><div class="num">13</div><div class="lbl">Trainees Graduated</div></div>
+      <div class="kpi"><div class="num">90%</div><div class="lbl">Practical Learning</div></div>
+      <div class="kpi"><div class="num">10</div><div class="lbl">Starter Kits Issued</div></div>
+      <div class="kpi"><div class="num">80</div><div class="lbl">Youth / Year Target</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6"><img src="{{ url_for('static', filename='img/workshop.jpg') }}" alt="Workshop" class="img-fluid"></div>
+      <div class="col-md-6">
+        <div class="section-head"><div class="eyebrow">From Training to Livelihood</div><h2>Learning That Leads to Enterprise</h2></div>
+        <p>Graduates return to their communities and establish small electronics repair enterprises, providing affordable services while creating income for themselves and their families.</p>
+        <p>Our vision is a network of community-based enterprises associated with the Maxim Nyansa Electronics identity.</p>
+        <a href="{{ url_for('main.about') }}" class="btn-mn-outline btn-sm">About the program</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

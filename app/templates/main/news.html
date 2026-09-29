@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center"><div class="eyebrow">Updates</div><h2>News & Stories</h2></div>
+    {% for p in posts %}
+      <div class="mn-card" style="margin-bottom:1.5rem;padding:1.5rem">
+        <h5>{{ p.title }}</h5>
+        <div class="text-muted" style="font-size:.85rem">{{ p.published_at.strftime('%B %d, %Y') }}</div>
+        <p style="margin-top:.5rem">{{ p.body }}</p>
+      </div>
+    {% else %}<p class="text-center text-muted">No posts yet.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

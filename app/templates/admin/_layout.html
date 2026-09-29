@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-side">
+    <h6>Manage</h6>
+    <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('admin.applications') }}">Applications</a>
+    <a href="{{ url_for('admin.programs') }}">Programs</a>
+    <a href="{{ url_for('admin.products') }}">Products</a>
+    <a href="{{ url_for('admin.orders') }}">Orders</a>
+    <a href="{{ url_for('admin.resources') }}">E-Library</a>
+    <a href="{{ url_for('admin.donations') }}">Donations</a>
+    <a href="{{ url_for('admin.messages') }}">Messages</a>
+  </aside>
+  <main class="admin-main">
+    {% block admin %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

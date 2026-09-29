@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:760px">
+    <div class="section-head"><div class="eyebrow">{{ resource.category }}</div><h2>{{ resource.title }}</h2></div>
+    <p>{{ resource.description }}</p>
+    <a href="{{ resource.file_url }}" target="_blank" class="btn-mn-primary">Open Resource</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">Electronics Shop</div><h2>New & Refurbished Equipment</h2></div>
+    <form method="GET" class="d-flex flex-wrap gap-2 mb-3">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search products..." style="flex:1;min-width:200px;padding:.6rem;border:1px solid #ddd;border-radius:8px">
+      <select name="cat" style="padding:.6rem;border:1px solid #ddd;border-radius:8px">
+        <option value="">All Categories</option>
+        {% for c in categories %}<option value="{{ c.slug }}" {% if current_cat==c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+      <button class="btn-mn-primary btn-sm" type="submit">Filter</button>
+    </form>
+    <div class="row">
+      {% for p in products %}
+      <div class="col-md-4">
+        <div class="mn-card">
+          {% if p.image %}<img src="{{ url_for('static', filename=p.image) }}">{% else %}<img src="{{ url_for('static', filename='img/tools.jpg') }}">{% endif %}
+          <div class="card-body">
+            <h5>{{ p.name }}</h5>
+            <span class="badge-status badge-{{ 'approved' if p.condition=='new' else 'pending' }}">{{ p.condition }}</span>
+            <div class="price">Le {{ "{:,.0f}".format(p.price) }}</div>
+            <div class="d-flex gap-2" style="margin-top:auto">
+              <a href="{{ url_for('shop.product_detail', slug=p.slug) }}" class="btn-mn-outline btn-sm">View</a>
+              <form method="POST" action="{{ url_for('shop.add_to_cart', pid=p.id) }}" style="margin:0">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn-mn-primary btn-sm" type="submit">Add</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% else %}<p class="text-muted">No products found.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:840px">
+    <div class="section-head"><div class="eyebrow">Program</div><h2>{{ program.title }}</h2></div>
+    {% if program.cover_image %}<img src="{{ url_for('static', filename=program.cover_image) }}" class="img-fluid mb-3">{% endif %}
+    <div class="prose">
+      <p>{{ program.description }}</p>
+      <p><strong>Capacity:</strong> {{ program.capacity }} • <strong>Fee:</strong> {{ program.fee }} • <strong>Status:</strong> {{ program.status }}</p>
+      {% if program.start_date %}<p><strong>Starts:</strong> {{ program.start_date }} • <strong>Ends:</strong> {{ program.end_date }}</p>{% endif %}
+    </div>
+    <a href="{{ url_for('training.apply') }}?program_id={{ program.id }}" class="btn-mn-primary">Apply for this Program</a>
+  </div>
+</section>
+{% endblock %}

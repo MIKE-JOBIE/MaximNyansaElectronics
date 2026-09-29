@@ -1,0 +1,26 @@
+<nav class="mn-navbar">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap">
+      <a class="navbar-brand" href="{{ url_for('main.index') }}" style="display:flex;align-items:center;gap:.5rem;font-family:'Bebas Neue';font-size:1.6rem;color:#1A1A1A">
+        <span style="background:#8DC63F;color:#fff;padding:.3rem .55rem;border-radius:6px;font-size:1.4rem">MN</span>
+        <span>MAXIM NYANSA <span style="color:#8DC63F">ELECTRONICS</span></span>
+      </a>
+      <button class="navbar-toggler" style="background:none;border:none;font-size:1.5rem;cursor:pointer;display:none">☰</button>
+      <div id="nav" class="d-flex flex-wrap align-items-center gap-2">
+        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+        <a class="nav-link" href="{{ url_for('main.about') }}">About</a>
+        <a class="nav-link" href="{{ url_for('training.index') }}">Training</a>
+        <a class="nav-link" href="{{ url_for('shop.index') }}">Shop</a>
+        <a class="nav-link" href="{{ url_for('library.index') }}">E-Library</a>
+        <a class="nav-link" href="{{ url_for('donors.index') }}">Donors</a>
+        <a class="nav-link" href="{{ url_for('main.contact') }}">Contact</a>
+        {% if current_user.is_authenticated %}
+          <a class="btn-mn-outline btn-sm" href="{{ url_for('auth.profile') }}">{{ current_user.first_name or 'Account' }}</a>
+          {% if current_user.is_admin %}<a class="btn-mn-primary btn-sm" href="{{ url_for('admin.dashboard') }}">Admin</a>{% endif %}
+          <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+          <a class="btn-mn-outline btn-sm" href="{{ url_for('auth.login') }}">Login</a>
+          <a class="btn-mn-primary btn-sm" href="{{ url_for('auth.register') }}">Apply Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>

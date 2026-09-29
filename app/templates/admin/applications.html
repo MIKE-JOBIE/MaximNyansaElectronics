@@ -1,0 +1,26 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>Applications</h1>
+  <div><a class="btn-mn-outline btn-sm" href="?status=pending">Pending</a>
+       <a class="btn-mn-outline btn-sm" href="?status=approved">Approved</a>
+       <a class="btn-mn-outline btn-sm" href="{{ url_for('admin.applications') }}">All</a></div>
+</div>
+<table class="mn-table">
+  <thead><tr><th>Applicant</th><th>Program</th><th>Education</th><th>Motivation</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for a in applications %}
+    <tr>
+      <td>{{ a.applicant.full_name }}<br><small class="text-muted">{{ a.applicant.email }}</small></td>
+      <td>{{ a.program.title }}</td>
+      <td>{{ a.education }}</td>
+      <td style="max-width:280px"><small>{{ a.motivation[:120] }}{% if a.motivation|length>120 %}…{% endif %}</small></td>
+      <td><span class="badge-status badge-{{ a.status }}">{{ a.status }}</span></td>
+      <td>
+        <form method="POST" action="{{ url_for('admin.application_action', aid=a.id, action='approve') }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-mn-primary btn-sm">Approve</button></form>
+        <form method="POST" action="{{ url_for('admin.application_action', aid=a.id, action='reject') }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-mn-danger btn-sm">Reject</button></form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

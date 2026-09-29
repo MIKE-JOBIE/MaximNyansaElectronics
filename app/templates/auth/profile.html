@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">Account</div><h2>{{ current_user.full_name }}</h2></div>
+    <div class="row">
+      <div class="col-md-6"><div class="mn-card" style="padding:1.5rem">
+        <h5>Details</h5>
+        <p><strong>Email:</strong> {{ current_user.email }}</p>
+        <p><strong>Phone:</strong> {{ current_user.phone or "—" }}</p>
+        <p><strong>Role:</strong> {{ current_user.role }}</p>
+      </div></div>
+      <div class="col-md-6"><div class="mn-card" style="padding:1.5rem">
+        <h5>Quick links</h5>
+        <p><a href="{{ url_for('training.my_applications') }}" class="btn-mn-outline btn-sm">My Applications</a></p>
+        <p style="margin-top:1rem"><a href="{{ url_for('shop.index') }}" class="btn-mn-outline btn-sm">Shop</a></p>
+      </div></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

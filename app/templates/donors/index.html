@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="mn-hero" style="min-height:50vh">
+  <div class="container">
+    <div class="col-lg-7">
+      <h1>Your Support Changes Lives</h1>
+      <p class="lead">Every contribution trains a young person with real, marketable skills — building enterprise, dignity, and hope.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem">
+      <div class="kpi"><div class="num">{{ donors_count }}</div><div class="lbl">Supporters</div></div>
+      <div class="kpi"><div class="num">Le {{ "{:,.0f}".format(total) }}</div><div class="lbl">Pledged</div></div>
+      <div class="kpi"><div class="num">80</div><div class="lbl">Youth / Year Target</div></div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="prose">
+          <h3>Where Your Gift Goes</h3>
+          <ul>
+            <li>Training tools and repair equipment</li>
+            <li>Consumables and workshop utilities</li>
+            <li>Starter kits for outstanding graduates</li>
+            <li>Trainer support and logistics</li>
+            <li>Refurbishment center operations</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <form method="POST" class="mn-form" style="margin-top:0">
+          {{ form.hidden_tag() }}
+          <h5 style="font-family:'Bebas Neue';font-size:1.6rem;margin:0 0 1rem">Pledge a Donation</h5>
+          <label>Full Name</label>{{ form.donor_name() }}
+          <label>Email</label>{{ form.email() }}
+          <label>Amount</label>{{ form.amount() }}
+          <label>Currency</label>{{ form.currency() }}
+          <label>Message (optional)</label>{{ form.message() }}
+          <div style="margin-top:1rem">{{ form.submit(class="btn-mn-primary", style="width:100%") }}</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

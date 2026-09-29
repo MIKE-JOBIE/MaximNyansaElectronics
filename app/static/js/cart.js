@@ -1,0 +1,1 @@
+function updateQty(pid, qty){ document.getElementById("qty-"+pid).value = qty; document.getElementById("qty-form-"+pid).submit(); }

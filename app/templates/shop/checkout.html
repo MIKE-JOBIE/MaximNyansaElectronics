@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">Checkout</div><h2>Complete Your Order</h2></div>
+    <div class="row">
+      <div class="col-md-6">
+        <form method="POST" class="mn-form" style="margin-top:0">
+          {{ form.hidden_tag() }}
+          <label>Full Name</label>{{ form.full_name() }}
+          <label>Phone</label>{{ form.phone() }}
+          <label>Delivery Address</label>{{ form.address() }}
+          <label>Notes</label>{{ form.notes() }}
+          <div style="margin-top:1rem">{{ form.submit(class="btn-mn-primary", style="width:100%") }}</div>
+        </form>
+      </div>
+      <div class="col-md-6">
+        <div class="mn-card" style="padding:1.5rem">
+          <h5>Order Summary</h5>
+          {% for it in items %}
+            <p>{{ it.product.name }} × {{ it.qty }} — Le {{ "{:,.0f}".format(it.line) }}</p>
+          {% endfor %}
+          <hr>
+          <p style="font-family:'Bebas Neue';font-size:1.5rem">Total: Le {{ "{:,.0f}".format(total) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

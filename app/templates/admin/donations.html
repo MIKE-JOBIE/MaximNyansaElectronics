@@ -1,0 +1,19 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>Donations</h1></div>
+<table class="mn-table">
+  <thead><tr><th>Donor</th><th>Amount</th><th>Currency</th><th>Message</th><th>Verified</th><th></th></tr></thead>
+  <tbody>
+  {% for d in donations %}
+    <tr>
+      <td>{{ d.donor_name }}<br><small class="text-muted">{{ d.email }}</small></td>
+      <td>{{ "{:,.2f}".format(d.amount) }}</td>
+      <td>{{ d.currency }}</td>
+      <td><small>{{ d.message[:80] if d.message else '' }}</small></td>
+      <td>{{ '✓' if d.verified else '—' }}</td>
+      <td>{% if not d.verified %}<form method="POST" action="{{ url_for('admin.donation_verify', did=d.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn-mn-primary btn-sm">Verify</button></form>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
