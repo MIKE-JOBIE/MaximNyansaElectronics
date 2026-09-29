@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">My Account</div><h2>My Orders</h2></div>
+    {% if orders %}
+    <table class="mn-table">
+      <thead><tr><th>Reference</th><th>Date</th><th>Total</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td>{{ o.reference }}</td>
+          <td>{{ o.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>Le {{ "{:,.0f}".format(o.total) }}</td>
+          <td><span class="badge-status badge-{{ o.status }}">{{ o.status }}</span></td>
+          <td><a href="{{ url_for('shop.order_detail', ref=o.reference) }}" class="btn-mn-outline btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="text-muted">You haven't placed any orders yet. <a href="{{ url_for('shop.index') }}">Browse the shop</a>.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

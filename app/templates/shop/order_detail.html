@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head"><div class="eyebrow">Order {{ order.reference }}</div><h2>Order Details</h2></div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="mn-card" style="padding:1.5rem">
+          <h5>Delivery Info</h5>
+          <p><strong>Name:</strong> {{ order.full_name }}</p>
+          <p><strong>Phone:</strong> {{ order.phone }}</p>
+          <p><strong>Address:</strong> {{ order.address }}</p>
+          {% if order.notes %}<p><strong>Notes:</strong> {{ order.notes }}</p>{% endif %}
+          <p><strong>Placed:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+          <p><strong>Status:</strong> <span class="badge-status badge-{{ order.status }}">{{ order.status }}</span></p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="mn-card" style="padding:1.5rem">
+          <h5>Items</h5>
+          {% for item in order.items %}
+            <p>{{ item.product.name }} × {{ item.qty }} — Le {{ "{:,.0f}".format(item.unit_price * item.qty) }}</p>
+          {% endfor %}
+          <hr>
+          <p style="font-family:'Bebas Neue';font-size:1.5rem">Total: Le {{ "{:,.0f}".format(order.total) }}</p>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:1.5rem"><a href="{{ url_for('shop.my_orders') }}" class="btn-mn-outline btn-sm">Back to My Orders</a></p>
+  </div>
+</section>
+{% endblock %}

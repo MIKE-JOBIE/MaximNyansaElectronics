@@ -3,14 +3,34 @@
 <section class="section">
   <div class="container">
     <div class="section-head"><div class="eyebrow">Electronics Shop</div><h2>New & Refurbished Equipment</h2></div>
-    <form method="GET" class="d-flex flex-wrap gap-2 mb-3">
-      <input type="text" name="q" value="{{ q }}" placeholder="Search products..." style="flex:1;min-width:200px;padding:.6rem;border:1px solid #ddd;border-radius:8px">
+
+    <form method="GET" class="d-flex flex-wrap gap-2 mb-3" style="align-items:center">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search products..."
+             style="flex:1;min-width:200px;padding:.6rem;border:1px solid #ddd;border-radius:8px">
       <select name="cat" style="padding:.6rem;border:1px solid #ddd;border-radius:8px">
         <option value="">All Categories</option>
-        {% for c in categories %}<option value="{{ c.slug }}" {% if current_cat==c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        {% for c in categories %}
+          <option value="{{ c.slug }}" {% if current_cat==c.slug %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="condition" style="padding:.6rem;border:1px solid #ddd;border-radius:8px">
+        <option value="">Any Condition</option>
+        <option value="new" {% if condition=='new' %}selected{% endif %}>New</option>
+        <option value="refurbished" {% if condition=='refurbished' %}selected{% endif %}>Refurbished</option>
+        <option value="used" {% if condition=='used' %}selected{% endif %}>Used</option>
+      </select>
+      <select name="sort" style="padding:.6rem;border:1px solid #ddd;border-radius:8px">
+        <option value="newest" {% if sort=='newest' %}selected{% endif %}>Newest</option>
+        <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Price ↑</option>
+        <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Price ↓</option>
+        <option value="name" {% if sort=='name' %}selected{% endif %}>Name A-Z</option>
       </select>
       <button class="btn-mn-primary btn-sm" type="submit">Filter</button>
+      <a href="{{ url_for('shop.index') }}" class="btn-mn-outline btn-sm">Reset</a>
     </form>
+
+    <p class="text-muted" style="font-size:.9rem">{{ pagination.total }} product{{ 's' if pagination.total != 1 }} found</p>
+
     <div class="row">
       {% for p in products %}
       <div class="col-md-4">
@@ -32,6 +52,18 @@
       </div>
       {% else %}<p class="text-muted">No products found.</p>{% endfor %}
     </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="d-flex gap-2" style="justify-content:center;margin-top:2rem">
+      {% if pagination.has_prev %}
+        <a href="?page={{ pagination.prev_num }}&q={{ q }}&cat={{ current_cat or '' }}&condition={{ condition }}&sort={{ sort }}" class="btn-mn-outline btn-sm">← Prev</a>
+      {% endif %}
+      <span class="text-muted" style="align-self:center">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+      {% if pagination.has_next %}
+        <a href="?page={{ pagination.next_num }}&q={{ q }}&cat={{ current_cat or '' }}&condition={{ condition }}&sort={{ sort }}" class="btn-mn-outline btn-sm">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

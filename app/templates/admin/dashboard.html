@@ -1,6 +1,7 @@
 {% extends "admin/_layout.html" %}
 {% block admin %}
 <div class="admin-header"><h1>Dashboard</h1><span class="text-muted">Welcome, {{ current_user.first_name }}</span></div>
+
 <div class="kpi-grid">
   <div class="kpi"><div class="num">{{ stats.users }}</div><div class="lbl">Users</div></div>
   <div class="kpi"><div class="num">{{ stats.applications }}</div><div class="lbl">Applications</div></div>
@@ -12,12 +13,28 @@
   <div class="kpi"><div class="num">Le {{ "{:,.0f}".format(stats.donations_total) }}</div><div class="lbl">Pledged Donations</div></div>
 </div>
 
+<div class="row" style="margin-bottom:2rem">
+  <div class="col-md-6">
+    <div class="mn-card" style="padding:1.5rem">
+      <h5>Applications — Last 30 Days</h5>
+      <canvas id="appsChart" height="160"></canvas>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="mn-card" style="padding:1.5rem">
+      <h5>Applications by Status</h5>
+      <canvas id="statusChart" height="160"></canvas>
+    </div>
+  </div>
+</div>
+
 <h3 style="font-family:'Bebas Neue';font-size:1.6rem">Recent Applications</h3>
 <table class="mn-table mb-3">
   <thead><tr><th>Applicant</th><th>Program</th><th>Date</th><th>Status</th></tr></thead>
   <tbody>
     {% for a in recent_apps %}
-      <tr><td>{{ a.applicant.full_name }}</td><td>{{ a.program.title }}</td><td>{{ a.submitted_at.strftime('%Y-%m-%d') }}</td>
+      <tr><td>{{ a.applicant.full_name }}</td><td>{{ a.program.title }}</td>
+        <td>{{ a.submitted_at.strftime('%Y-%m-%d') }}</td>
         <td><span class="badge-status badge-{{ a.status }}">{{ a.status }}</span></td></tr>
     {% endfor %}
   </tbody>
@@ -28,9 +45,46 @@
   <thead><tr><th>Ref</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
   <tbody>
     {% for o in recent_orders %}
-      <tr><td>{{ o.reference }}</td><td>{{ o.customer.full_name if o.customer else '—' }}</td><td>Le {{ "{:,.0f}".format(o.total) }}</td>
+      <tr><td>{{ o.reference }}</td><td>{{ o.customer.full_name if o.customer else '—' }}</td>
+        <td>Le {{ "{:,.0f}".format(o.total) }}</td>
         <td><span class="badge-status badge-{{ o.status }}">{{ o.status }}</span></td></tr>
     {% endfor %}
   </tbody>
 </table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const appsData = {{ chart_apps | tojson }};
+  const statusData = {{ chart_status | tojson }};
+
+  new Chart(document.getElementById('appsChart'), {
+    type: 'line',
+    data: {
+      labels: appsData.labels,
+      datasets: [{
+        label: 'Applications',
+        data: appsData.values,
+        borderColor: '#8DC63F',
+        backgroundColor: 'rgba(141,198,63,.15)',
+        tension: 0.35,
+        fill: true,
+        pointBackgroundColor: '#6FA82E',
+        pointRadius: 4
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statusData.labels,
+      datasets: [{
+        data: statusData.values,
+        backgroundColor: ['#F5A623', '#8DC63F', '#4A90D9', '#D9534F']
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+</script>
 {% endblock %}

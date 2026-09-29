@@ -74,3 +74,28 @@ class ResourceForm(FlaskForm):
     file        = FileField("File (PDF / DOC / link file)")
     file_url    = StringField("Or external URL", validators=[Optional()])
     submit      = SubmitField("Save Resource")
+
+class ForgotPasswordForm(FlaskForm):
+    email  = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Send Reset Link")
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField("New Password", validators=[DataRequired(), Length(6, 128)])
+    confirm  = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo("password")])
+    submit   = SubmitField("Set New Password")
+
+
+class ProfileForm(FlaskForm):
+    first_name = StringField("First Name", validators=[DataRequired(), Length(2, 80)])
+    last_name  = StringField("Last Name", validators=[DataRequired(), Length(2, 80)])
+    phone      = StringField("Phone", validators=[Optional(), Length(5, 40)])
+    address    = StringField("Address", validators=[Optional(), Length(2, 255)])
+    submit     = SubmitField("Save Changes")
+
+
+class ChangePasswordForm(FlaskForm):
+    current  = PasswordField("Current Password", validators=[DataRequired()])
+    password = PasswordField("New Password", validators=[DataRequired(), Length(6, 128)])
+    confirm  = PasswordField("Confirm New Password", validators=[DataRequired(), EqualTo("password")])
+    submit   = SubmitField("Change Password")

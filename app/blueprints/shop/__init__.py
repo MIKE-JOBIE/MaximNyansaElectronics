@@ -11,18 +11,43 @@ def _cart(): return session.setdefault("cart", {})
 
 @shop_bp.route("/")
 def index():
+    page = request.args.get("page", 1, type=int)
     cat_slug = request.args.get("cat")
-    q = request.args.get("q","").strip()
+    q = request.args.get("q", "").strip()
+    condition = request.args.get("condition", "")
+    sort = request.args.get("sort", "newest")
+
     query = Product.query.filter_by(is_active=True)
+
     if cat_slug:
         c = Category.query.filter_by(slug=cat_slug).first()
-        if c: query = query.filter_by(category_id=c.id)
+        if c:
+            query = query.filter_by(category_id=c.id)
     if q:
         query = query.filter(Product.name.ilike(f"%{q}%"))
-    products = query.order_by(Product.created_at.desc()).all()
-    categories = Category.query.all()
-    return render_template("shop/index.html", products=products, categories=categories, current_cat=cat_slug, q=q)
+    if condition in ("new", "refurbished", "used"):
+        query = query.filter_by(condition=condition)
 
+    if sort == "price_asc":
+        query = query.order_by(Product.price.asc())
+    elif sort == "price_desc":
+        query = query.order_by(Product.price.desc())
+    elif sort == "name":
+        query = query.order_by(Product.name.asc())
+    else:
+        query = query.order_by(Product.created_at.desc())
+
+    pagination = query.paginate(page=page, per_page=9, error_out=False)
+    categories = Category.query.all()
+
+    return render_template("shop/index.html",
+                           products=pagination.items,
+                           pagination=pagination,
+                           categories=categories,
+                           current_cat=cat_slug,
+                           q=q,
+                           condition=condition,
+                           sort=sort)
 @shop_bp.route("/product/<slug>")
 def product_detail(slug):
     p = Product.query.filter_by(slug=slug, is_active=True).first_or_404()
@@ -91,8 +116,22 @@ def checkout():
         return redirect(url_for("shop.order_success", ref=order.reference))
     return render_template("shop/checkout.html", form=form, items=items, total=total)
 
-@shop_bp.route("/order/<ref>")
+# @shop_bp.route("/order/<ref>")
+# @login_required
+# def order_success(ref):
+#     o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
+#     return render_template("shop/order_success.html", order=o)
+
+@shop_bp.route("/orders")
 @login_required
-def order_success(ref):
+def my_orders():
+    orders = Order.query.filter_by(user_id=current_user.id)\
+        .order_by(Order.created_at.desc()).all()
+    return render_template("shop/my_orders.html", orders=orders)
+
+
+@shop_bp.route("/orders/<ref>")
+@login_required
+def order_detail(ref):
     o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
-    return render_template("shop/order_success.html", order=o)
+    return render_template("shop/order_detail.html", order=o)

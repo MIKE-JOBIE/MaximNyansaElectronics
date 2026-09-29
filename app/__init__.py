@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from .extensions import db, migrate, login_manager, csrf, mail
 from config import DevelopmentConfig, ProductionConfig, TestingConfig
 
@@ -49,5 +49,15 @@ def create_app(config_object=None):
 
     from .commands import register_commands
     register_commands(app)
+
+        # Error handlers
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def server_error(e):
+        db.session.rollback()
+        return render_template("errors/500.html"), 500
 
     return app

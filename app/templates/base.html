@@ -1,14 +1,36 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}{{ brand_name }} — Skills Today, Success Tomorrow{% endblock %}</title>
-<link rel="icon" href="{{ url_for('static', filename='img/logo.svg') }}">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-{% block head %}{% endblock %}
-</head>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ brand_name }} — Skills Today, Success Tomorrow{% endblock %}</title>
+  
+    <meta name="description" content="{% block description %}Maxim Nyansa Electronics SL — practical electronics training, repair, refurbishment, and enterprise development in Freetown, Sierra Leone.{% endblock %}">
+    <meta name="author" content="Maxim Nyansa Electronics SL">
+    <meta name="keywords" content="electronics training Sierra Leone, Freetown vocational training, electronics repair, youth enterprise, Maxim Nyansa">
+  
+    <!-- Open Graph (for social sharing) -->
+    <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
+    <meta property="og:description" content="{{ self.description() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Maxim Nyansa Electronics">
+    <meta property="og:image" content="{{ url_for('static', filename='img/hero-training.jpg', _external=True) }}">
+    <meta property="og:locale" content="en_SL">
+  
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ self.title() }}">
+    <meta name="twitter:description" content="{{ self.description() }}">
+  
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.svg') }}">
+  
+    <!-- Fonts + CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head %}{% endblock %}
+  </head>
 <body>
 {% include "partials/_navbar.html" %}
 {% with messages = get_flashed_messages(with_categories=true) %}

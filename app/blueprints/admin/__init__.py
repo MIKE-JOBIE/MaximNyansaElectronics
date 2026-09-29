@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
@@ -7,6 +7,7 @@ from ...models import (User, Program, Application, Product, Category,
 from ...forms import ProgramForm, ProductForm, ResourceForm
 from ...extensions import db
 from ...utils import slugify, save_upload
+from sqlalchemy import func
 
 admin_bp = Blueprint("admin", __name__, template_folder="../../templates/admin")
 
@@ -17,6 +18,9 @@ def admin_required(f):
             abort(403)
         return f(*a, **kw)
     return w
+
+from datetime import datetime, timedelta
+from sqlalchemy import func
 
 @admin_bp.route("/")
 @login_required
@@ -30,12 +34,40 @@ def dashboard():
         "products": Product.query.count(),
         "orders": Order.query.count(),
         "messages": Message.query.filter_by(is_read=False).count(),
-        "donations_total": float(db.session.query(db.func.coalesce(db.func.sum(Donation.amount),0)).scalar()),
+        "donations_total": float(db.session.query(func.coalesce(func.sum(Donation.amount), 0)).scalar()),
     }
     recent_apps = Application.query.order_by(Application.submitted_at.desc()).limit(6).all()
     recent_orders = Order.query.order_by(Order.created_at.desc()).limit(6).all()
-    return render_template("admin/dashboard.html", stats=stats,
-                           recent_apps=recent_apps, recent_orders=recent_orders)
+
+    # Chart data — applications per day for last 14 days
+    today = datetime.utcnow().date()
+    days = [(today - timedelta(days=i)) for i in range(13, -1, -1)]
+    chart_apps = {"labels": [d.strftime("%b %d") for d in days], "values": []}
+    for d in days:
+        count = Application.query.filter(
+            func.date(Application.submitted_at) == d
+        ).count()
+        chart_apps["values"].append(count)
+
+    # Chart data — status breakdown
+    status_counts = dict(
+        db.session.query(Application.status, func.count(Application.id))
+        .group_by(Application.status).all()
+    )
+    statuses = ["pending", "approved", "enrolled", "rejected"]
+    chart_status = {
+        "labels": [s.title() for s in statuses if s in status_counts],
+        "values": [status_counts.get(s, 0) for s in statuses if s in status_counts],
+    }
+    if not chart_status["labels"]:
+        chart_status = {"labels": ["No data"], "values": [0]}
+
+    return render_template("admin/dashboard.html",
+                           stats=stats,
+                           recent_apps=recent_apps,
+                           recent_orders=recent_orders,
+                           chart_apps=chart_apps,
+                           chart_status=chart_status)
 
 # --- APPLICATIONS ---
 @admin_bp.route("/applications")
