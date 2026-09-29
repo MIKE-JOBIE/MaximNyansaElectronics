@@ -31,7 +31,7 @@
       {% for p in programs %}
       <div class="col-md-4">
         <div class="mn-card">
-          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}" alt="{{ p.title }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.jpg') }}" alt="">{% endif %}
+          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}" alt="{{ p.title }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.svg') }}" alt="">{% endif %}
           <div class="card-body">
             <h5>{{ p.title }}</h5>
             <p class="text-muted" style="font-size:.9rem;margin:0">{{ p.summary }}</p>
@@ -59,7 +59,7 @@
 <section class="section section-alt">
   <div class="container">
     <div class="row">
-      <div class="col-md-6"><img src="{{ url_for('static', filename='img/workshop.jpg') }}" alt="Workshop" class="img-fluid"></div>
+      <div class="col-md-6"><img src="{{ url_for('static', filename='img/workshop.svg') }}" alt="Workshop" class="img-fluid"></div>
       <div class="col-md-6">
         <div class="section-head"><div class="eyebrow">From Training to Livelihood</div><h2>Learning That Leads to Enterprise</h2></div>
         <p>Graduates return to their communities and establish small electronics repair enterprises, providing affordable services while creating income for themselves and their families.</p>

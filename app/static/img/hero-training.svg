@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1A1A1A"/>
+      <stop offset="1" stop-color="#4A4A4A"/>
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1.5" fill="#8DC63F" opacity="0.25"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g)"/>
+  <rect width="1600" height="900" fill="url(#dots)"/>
+  <g transform="translate(800,450)" text-anchor="middle" fill="#8DC63F">
+    <circle r="120" fill="none" stroke="#8DC63F" stroke-width="3" opacity="0.3"/>
+    <circle r="90" fill="none" stroke="#8DC63F" stroke-width="2" opacity="0.5"/>
+    <text y="20" font-family="Arial Black, sans-serif" font-size="72" font-weight="900">TRAINING</text>
+    <text y="80" font-family="Arial, sans-serif" font-size="24" letter-spacing="4" fill="#fff">MAXIM NYANSA ELECTRONICS</text>
+  </g>
+  <text x="800" y="870" font-family="Arial, sans-serif" font-size="16" fill="#fff" opacity="0.4" text-anchor="middle">Replace this file with a real photo (hero-training.jpg)</text>
+</svg>

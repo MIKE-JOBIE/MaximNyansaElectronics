@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <rect width="800" height="600" fill="#E8F5D0"/>
+  <g transform="translate(400,280)" text-anchor="middle">
+    <circle r="100" fill="#8DC63F" opacity="0.15"/>
+    <text y="10" font-family="Arial Black, sans-serif" font-size="36" font-weight="900" fill="#6FA82E">WORKSHOP</text>
+    <text y="50" font-family="Arial, sans-serif" font-size="16" fill="#4A4A4A">Hands-on training environment</text>
+  </g>
+  <text x="400" y="570" font-family="Arial, sans-serif" font-size="12" fill="#A7A9AC" text-anchor="middle">Replace with real workshop photo</text>
+</svg>

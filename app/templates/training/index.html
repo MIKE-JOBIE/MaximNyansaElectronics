@@ -8,7 +8,7 @@
       {% for p in programs %}
       <div class="col-md-4">
         <div class="mn-card">
-          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.jpg') }}">{% endif %}
+          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.svg') }}">{% endif %}
           <div class="card-body">
             <h5>{{ p.title }}</h5>
             <p class="text-muted" style="font-size:.9rem">{{ p.summary }}</p>
