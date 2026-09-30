@@ -65,3 +65,152 @@
     text-decoration:none;
   }
   .admin-topbar .mode-link:hover{text-decoration:underline}
+
+  /* Admin navbar polish — logo stays put */
+.mn-navbar .container{flex-wrap:nowrap}
+.mn-navbar .brand-logo{flex-shrink:0}
+.admin-layout .mn-navbar{position:relative} /* admin layout handles its own sticky */
+
+/* In admin mode, disable sticky navbar (admin-topbar handles stickiness) */
+.admin-layout ~ .mn-navbar{position:static}
+
+/* =========================================================
+   ADMIN MODE — hide public navbar clutter, kill sticky overlap
+   ========================================================= */
+
+/* In admin mode, the public navbar sits ABOVE the sidebar layout.
+   It should NOT be sticky (it would overlap the admin header). */
+   .mn-navbar.mn-navbar-admin{
+    position:relative;
+    top:auto;
+    z-index:1;
+    border-bottom:1px solid #e8e8e8;
+  }
+  
+  /* Tighten the admin navbar inner spacing */
+  .mn-navbar.mn-navbar-admin .mn-navbar-inner{
+    max-width:100%;
+    padding:0 1rem;
+  }
+  
+  /* Admin layout takes full width below the navbar */
+  .admin-layout{
+    display:grid;
+    grid-template-columns:240px 1fr;
+    min-height:calc(100vh - 60px);
+    background:#f0f2ee;
+  }
+  
+  /* Sidebar — cleaner spacing */
+  .admin-side{
+    background:#1A1A1A;
+    color:#d9d9d9;
+    padding:1.5rem 1rem;
+    overflow-y:auto;
+  }
+  .admin-side .admin-view-site{
+    display:block;
+    background:linear-gradient(135deg,#8DC63F,#6FA82E);
+    color:#fff !important;
+    padding:.7rem 1rem;
+    border-radius:8px;
+    text-align:center;
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    font-size:.8rem;
+    margin-bottom:1.2rem;
+    text-decoration:none;
+  }
+  .admin-side .admin-view-site:hover{
+    background:linear-gradient(135deg,#6FA82E,#4F7A1F);
+  }
+  
+  /* Admin topbar */
+  .admin-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#fff;
+    padding:.6rem 1rem;
+    border-radius:8px;
+    margin-bottom:1rem;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+  }
+  .admin-topbar .mode{
+    display:flex;align-items:center;gap:.5rem;
+    font-family:'Oswald',sans-serif;font-size:.85rem;
+    text-transform:uppercase;letter-spacing:.5px;color:#4A4A4A;
+  }
+  .admin-topbar .mode .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:#8DC63F;
+    box-shadow:0 0 0 3px rgba(141,198,63,.25);
+  }
+  .admin-topbar .mode-link{
+    color:#6FA82E;font-family:'Oswald',sans-serif;
+    font-size:.8rem;text-transform:uppercase;
+    letter-spacing:.5px;text-decoration:none;
+  }
+  .admin-topbar .mode-link:hover{text-decoration:underline}
+  
+  .admin-main{padding:2rem}
+  
+  @media (max-width:820px){
+    .admin-layout{grid-template-columns:1fr}
+    .admin-side{padding:.8rem}
+    .admin-main{padding:1rem}
+  }
+
+  /* =========================================================
+   ADMIN MODE — compact logo, no sticky overlap
+   ========================================================= */
+
+.mn-navbar.mn-navbar-admin{
+  position:relative;
+  top:auto;
+  z-index:1;
+  border-bottom:1px solid #e8e8e8;
+  padding:.35rem 0;
+}
+
+.mn-navbar.mn-navbar-admin .mn-navbar-inner{
+  max-width:100%;
+  padding:0 1rem;
+}
+
+/* Shrink the logo in admin mode so it never crowds the sidebar */
+.mn-navbar.mn-navbar-admin .brand-logo{
+  height:36px;
+  max-width:200px;
+}
+
+@media (max-width:820px){
+  .mn-navbar.mn-navbar-admin .brand-logo{
+    height:32px;
+    max-width:180px;
+  }
+}
+
+/* Admin layout */
+.admin-layout{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  min-height:calc(100vh - 56px);
+  background:#f0f2ee;
+}
+
+.admin-side{
+  background:#1A1A1A;
+  color:#d9d9d9;
+  padding:1.5rem 1rem;
+  overflow-y:auto;
+}
+
+.admin-main{padding:2rem}
+
+@media (max-width:820px){
+  .admin-layout{grid-template-columns:1fr}
+  .admin-main{padding:1rem}
+}

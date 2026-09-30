@@ -1,24 +1,21 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, send_file
 from flask_login import login_required, current_user
+from io import BytesIO
+
 from ...models import (User, Program, Application, Product, Category,
                        Order, Resource, Donation, Message, Post, VideoTestimonial)
-from ...forms import ProgramForm, ProductForm, ResourceForm
+from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm, VideoForm
 from ...extensions import db
 from ...utils import slugify, save_upload
-from sqlalchemy import func
+from ...certificate import generate_certificate
 from .settings_routes import register_settings_routes
-from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm
 from .bulk_routes import register_bulk_routes
 
-from flask import send_file
-from io import BytesIO
-from ...certificate import generate_certificate
-
-from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm, VideoForm
 
 admin_bp = Blueprint("admin", __name__, template_folder="../../templates/admin")
+
 
 def admin_required(f):
     @wraps(f)
@@ -28,13 +25,12 @@ def admin_required(f):
         return f(*a, **kw)
     return w
 
-from datetime import datetime, timedelta
-from sqlalchemy import func
 
 @admin_bp.route("/")
 @login_required
 @admin_required
 def dashboard():
+    from sqlalchemy import func
     stats = {
         "users": User.query.count(),
         "applications": Application.query.count(),
@@ -48,17 +44,14 @@ def dashboard():
     recent_apps = Application.query.order_by(Application.submitted_at.desc()).limit(6).all()
     recent_orders = Order.query.order_by(Order.created_at.desc()).limit(6).all()
 
-    # Chart data — applications per day for last 14 days
+    from datetime import timedelta
     today = datetime.utcnow().date()
     days = [(today - timedelta(days=i)) for i in range(13, -1, -1)]
     chart_apps = {"labels": [d.strftime("%b %d") for d in days], "values": []}
     for d in days:
-        count = Application.query.filter(
-            func.date(Application.submitted_at) == d
-        ).count()
+        count = Application.query.filter(func.date(Application.submitted_at) == d).count()
         chart_apps["values"].append(count)
 
-    # Chart data — status breakdown
     status_counts = dict(
         db.session.query(Application.status, func.count(Application.id))
         .group_by(Application.status).all()
@@ -72,11 +65,10 @@ def dashboard():
         chart_status = {"labels": ["No data"], "values": [0]}
 
     return render_template("admin/dashboard.html",
-                           stats=stats,
-                           recent_apps=recent_apps,
+                           stats=stats, recent_apps=recent_apps,
                            recent_orders=recent_orders,
-                           chart_apps=chart_apps,
-                           chart_status=chart_status)
+                           chart_apps=chart_apps, chart_status=chart_status)
+
 
 # --- APPLICATIONS ---
 @admin_bp.route("/applications")
@@ -85,87 +77,105 @@ def dashboard():
 def applications():
     status = request.args.get("status")
     q = Application.query
-    if status: q = q.filter_by(status=status)
+    if status:
+        q = q.filter_by(status=status)
     apps = q.order_by(Application.submitted_at.desc()).all()
     return render_template("admin/applications.html", applications=apps, status=status)
+
 
 @admin_bp.route("/applications/<int:aid>/<action>", methods=["POST"])
 @login_required
 @admin_required
 def application_action(aid, action):
     a = Application.query.get_or_404(aid)
-    if action in ("approve","reject","enroll"):
-        a.status = {"approve":"approved","reject":"rejected","enroll":"enrolled"}[action]
+    if action in ("approve", "reject", "enroll"):
+        a.status = {"approve": "approved", "reject": "rejected", "enroll": "enrolled"}[action]
         a.reviewed_at = datetime.utcnow()
         db.session.commit()
         flash(f"Application {a.status}.", "success")
     return redirect(url_for("admin.applications"))
+
 
 # --- PROGRAMS ---
 @admin_bp.route("/programs")
 @login_required
 @admin_required
 def programs():
-    return render_template("admin/programs.html", programs=Program.query.order_by(Program.created_at.desc()).all())
+    return render_template("admin/programs.html",
+                           programs=Program.query.order_by(Program.created_at.desc()).all())
 
-@admin_bp.route("/programs/new", methods=["GET","POST"])
+
+@admin_bp.route("/programs/new", methods=["GET", "POST"])
 @login_required
 @admin_required
 def program_new():
     form = ProgramForm()
     if form.validate_on_submit():
-        img = save_upload(form.cover_image.data, "prog_")
+        img = save_upload(form.cover_image.data, "prog_", preset="program")
         p = Program(title=form.title.data, slug=slugify(form.title.data),
                     summary=form.summary.data, description=form.description.data,
                     capacity=form.capacity.data, fee=form.fee.data,
                     status=form.status.data, cover_image=img)
-        db.session.add(p); db.session.commit()
+        db.session.add(p)
+        db.session.commit()
         flash("Program created.", "success")
         return redirect(url_for("admin.programs"))
     return render_template("admin/program_form.html", form=form, program=None)
 
-@admin_bp.route("/programs/<int:pid>/edit", methods=["GET","POST"])
+
+@admin_bp.route("/programs/<int:pid>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def program_edit(pid):
     p = Program.query.get_or_404(pid)
     form = ProgramForm(obj=p)
     if form.validate_on_submit():
-        p.title=form.title.data; p.slug=slugify(form.title.data)
-        p.summary=form.summary.data; p.description=form.description.data
-        p.capacity=form.capacity.data; p.fee=form.fee.data; p.status=form.status.data
-        img = save_upload(form.cover_image.data, "prog_")
-        if img: p.cover_image = img
-        db.session.commit(); flash("Program updated.","success")
+        p.title = form.title.data
+        p.slug = slugify(form.title.data)
+        p.summary = form.summary.data
+        p.description = form.description.data
+        p.capacity = form.capacity.data
+        p.fee = form.fee.data
+        p.status = form.status.data
+        img = save_upload(form.cover_image.data, "prog_", preset="program")
+        if img:
+            p.cover_image = img
+        db.session.commit()
+        flash("Program updated.", "success")
         return redirect(url_for("admin.programs"))
     return render_template("admin/program_form.html", form=form, program=p)
+
 
 # --- PRODUCTS ---
 @admin_bp.route("/products")
 @login_required
 @admin_required
 def products():
-    return render_template("admin/products.html", products=Product.query.order_by(Product.created_at.desc()).all())
+    return render_template("admin/products.html",
+                           products=Product.query.order_by(Product.created_at.desc()).all())
 
-@admin_bp.route("/products/new", methods=["GET","POST"])
+
+@admin_bp.route("/products/new", methods=["GET", "POST"])
 @login_required
 @admin_required
 def product_new():
     form = ProductForm()
     form.category_id.choices = [(c.id, c.name) for c in Category.query.all()]
     if form.validate_on_submit():
-        img = save_upload(form.image.data, "prod_")
+        img = save_upload(form.image.data, "prod_", preset="product")
         p = Product(name=form.name.data, slug=slugify(form.name.data),
                     description=form.description.data, price=form.price.data,
                     stock=form.stock.data, condition=form.condition.data,
                     category_id=form.category_id.data, image=img,
-                    is_active=(form.is_active.data=="yes"))
-        db.session.add(p); db.session.commit()
+                    is_active=(form.is_active.data == "yes"))
+        db.session.add(p)
+        db.session.commit()
         flash("Product created.", "success")
         return redirect(url_for("admin.products"))
     return render_template("admin/product_form.html", form=form, product=None)
 
-@admin_bp.route("/products/<int:pid>/edit", methods=["GET","POST"])
+
+@admin_bp.route("/products/<int:pid>/edit", methods=["GET", "POST"])
 @login_required
 @admin_required
 def product_edit(pid):
@@ -175,49 +185,65 @@ def product_edit(pid):
     if request.method == "GET":
         form.is_active.data = "yes" if p.is_active else "no"
     if form.validate_on_submit():
-        p.name=form.name.data; p.slug=slugify(form.name.data)
-        p.description=form.description.data; p.price=form.price.data
-        p.stock=form.stock.data; p.condition=form.condition.data
-        p.category_id=form.category_id.data; p.is_active=(form.is_active.data=="yes")
-        img = save_upload(form.image.data, "prod_")
-        if img: p.image = img
-        db.session.commit(); flash("Product updated.","success")
+        p.name = form.name.data
+        p.slug = slugify(form.name.data)
+        p.description = form.description.data
+        p.price = form.price.data
+        p.stock = form.stock.data
+        p.condition = form.condition.data
+        p.category_id = form.category_id.data
+        p.is_active = (form.is_active.data == "yes")
+        img = save_upload(form.image.data, "prod_", preset="product")
+        if img:
+            p.image = img
+        db.session.commit()
+        flash("Product updated.", "success")
         return redirect(url_for("admin.products"))
     return render_template("admin/product_form.html", form=form, product=p)
+
 
 # --- ORDERS ---
 @admin_bp.route("/orders")
 @login_required
 @admin_required
 def orders():
-    return render_template("admin/orders.html", orders=Order.query.order_by(Order.created_at.desc()).all())
+    return render_template("admin/orders.html",
+                           orders=Order.query.order_by(Order.created_at.desc()).all())
+
 
 @admin_bp.route("/orders/<int:oid>/<status>", methods=["POST"])
 @login_required
 @admin_required
 def order_status(oid, status):
     o = Order.query.get_or_404(oid)
-    if status in ("pending","paid","shipped","delivered","cancelled"):
-        o.status = status; db.session.commit()
+    if status in ("pending", "paid", "shipped", "delivered", "cancelled"):
+        o.status = status
+        db.session.commit()
         flash(f"Order marked {status}.", "success")
     return redirect(url_for("admin.orders"))
+
 
 # --- MESSAGES ---
 @admin_bp.route("/messages")
 @login_required
 @admin_required
 def messages():
-    return render_template("admin/messages.html", messages=Message.query.order_by(Message.created_at.desc()).all())
+    return render_template("admin/messages.html",
+                           messages=Message.query.order_by(Message.created_at.desc()).all())
+
 
 @admin_bp.route("/messages/<int:mid>/read", methods=["POST"])
 @login_required
 @admin_required
 def message_read(mid):
-    m = Message.query.get_or_404(mid); m.is_read = True; db.session.commit()
+    m = Message.query.get_or_404(mid)
+    m.is_read = True
+    db.session.commit()
     return redirect(url_for("admin.messages"))
 
+
 # --- RESOURCES ---
-@admin_bp.route("/resources", methods=["GET","POST"])
+@admin_bp.route("/resources", methods=["GET", "POST"])
 @login_required
 @admin_required
 def resources():
@@ -225,32 +251,37 @@ def resources():
     if form.validate_on_submit():
         url = form.file_url.data or ""
         if form.file.data and form.file.data.filename:
-            url = "/static/" + save_upload(form.file.data, "lib_")
+            url = "/static/" + save_upload(form.file.data, "lib_", preset="resource")
         r = Resource(title=form.title.data, slug=slugify(form.title.data),
                      description=form.description.data, category=form.category.data,
                      file_url=url)
-        db.session.add(r); db.session.commit()
+        db.session.add(r)
+        db.session.commit()
         flash("Resource added.", "success")
         return redirect(url_for("admin.resources"))
     return render_template("admin/resources.html",
                            resources=Resource.query.order_by(Resource.created_at.desc()).all(),
                            form=form)
 
+
 # --- DONATIONS ---
 @admin_bp.route("/donations")
 @login_required
 @admin_required
 def donations():
-    return render_template("admin/donations.html", donations=Donation.query.order_by(Donation.created_at.desc()).all())
+    return render_template("admin/donations.html",
+                           donations=Donation.query.order_by(Donation.created_at.desc()).all())
+
 
 @admin_bp.route("/donations/<int:did>/verify", methods=["POST"])
 @login_required
 @admin_required
 def donation_verify(did):
-    d = Donation.query.get_or_404(did); d.verified = True; db.session.commit()
+    d = Donation.query.get_or_404(did)
+    d.verified = True
+    db.session.commit()
     return redirect(url_for("admin.donations"))
 
-register_settings_routes(admin_bp)
 
 # --- NEWS / BLOG ---
 @admin_bp.route("/news")
@@ -267,10 +298,11 @@ def news():
 def news_new():
     form = PostForm()
     if form.validate_on_submit():
-        img = save_upload(form.cover_image.data, "post_")
+        img = save_upload(form.cover_image.data, "post_", preset="news")
         p = Post(title=form.title.data, slug=slugify(form.title.data),
                  body=form.body.data, cover_image=img)
-        db.session.add(p); db.session.commit()
+        db.session.add(p)
+        db.session.commit()
         flash("Post published.", "success")
         return redirect(url_for("admin.news"))
     return render_template("admin/news_form.html", form=form, post=None)
@@ -284,10 +316,11 @@ def news_edit(pid):
     form = PostForm(obj=p)
     if form.validate_on_submit():
         p.title = form.title.data
-        p.slug  = slugify(form.title.data)
-        p.body  = form.body.data
-        img = save_upload(form.cover_image.data, "post_")
-        if img: p.cover_image = img
+        p.slug = slugify(form.title.data)
+        p.body = form.body.data
+        img = save_upload(form.cover_image.data, "post_", preset="news")
+        if img:
+            p.cover_image = img
         db.session.commit()
         flash("Post updated.", "success")
         return redirect(url_for("admin.news"))
@@ -299,36 +332,11 @@ def news_edit(pid):
 @admin_required
 def news_delete(pid):
     p = Post.query.get_or_404(pid)
-    db.session.delete(p); db.session.commit()
+    db.session.delete(p)
+    db.session.commit()
     flash("Post deleted.", "info")
     return redirect(url_for("admin.news"))
 
-# --- CERTIFICATES ---
-@admin_bp.route("/programs/<int:pid>/graduates")
-@login_required
-@admin_required
-def program_graduates(pid):
-    p = Program.query.get_or_404(pid)
-    grads = Application.query.filter_by(program_id=pid, status="enrolled")\
-                             .order_by(Application.submitted_at).all()
-    return render_template("admin/graduates.html", program=p, graduates=grads)
-
-
-@admin_bp.route("/applications/<int:aid>/certificate")
-@login_required
-@admin_required
-def certificate_download(aid):
-    a = Application.query.get_or_404(aid)
-    if a.status not in ("enrolled", "approved"):
-        flash("Certificate only available for approved or enrolled trainees.", "warning")
-        return redirect(url_for("admin.applications"))
-
-    pdf_bytes = generate_certificate(a.applicant.full_name, a.program.title)
-    filename = f"certificate_{a.id}_{a.applicant.last_name or 'trainee'}.pdf"
-    return send_file(BytesIO(pdf_bytes), mimetype="application/pdf",
-                     as_attachment=True, download_name=filename)
-
-register_bulk_routes(admin_bp)
 
 # --- VIDEO TESTIMONIALS ---
 @admin_bp.route("/videos")
@@ -346,7 +354,7 @@ def video_new():
     form = VideoForm()
     form.program_id.choices = [(0, "— None —")] + [(p.id, p.title) for p in Program.query.all()]
     if form.validate_on_submit():
-        thumb = save_upload(form.thumbnail.data, "vid_")
+        thumb = save_upload(form.thumbnail.data, "vid_", preset="video")
         v = VideoTestimonial(
             title=form.title.data, trainee_name=form.trainee_name.data,
             description=form.description.data, video_url=form.video_url.data,
@@ -354,7 +362,8 @@ def video_new():
             program_id=(form.program_id.data or None),
             featured=(form.featured.data == "yes"),
             is_published=(form.is_published.data == "yes"))
-        db.session.add(v); db.session.commit()
+        db.session.add(v)
+        db.session.commit()
         flash("Video added.", "success")
         return redirect(url_for("admin.videos"))
     return render_template("admin/video_form.html", form=form, video=None)
@@ -379,8 +388,9 @@ def video_edit(vid):
         v.program_id = form.program_id.data or None
         v.featured = (form.featured.data == "yes")
         v.is_published = (form.is_published.data == "yes")
-        thumb = save_upload(form.thumbnail.data, "vid_")
-        if thumb: v.thumbnail = thumb
+        thumb = save_upload(form.thumbnail.data, "vid_", preset="video")
+        if thumb:
+            v.thumbnail = thumb
         db.session.commit()
         flash("Video updated.", "success")
         return redirect(url_for("admin.videos"))
@@ -392,6 +402,37 @@ def video_edit(vid):
 @admin_required
 def video_delete(vid):
     v = VideoTestimonial.query.get_or_404(vid)
-    db.session.delete(v); db.session.commit()
+    db.session.delete(v)
+    db.session.commit()
     flash("Video deleted.", "info")
     return redirect(url_for("admin.videos"))
+
+
+# --- CERTIFICATES ---
+@admin_bp.route("/programs/<int:pid>/graduates")
+@login_required
+@admin_required
+def program_graduates(pid):
+    p = Program.query.get_or_404(pid)
+    grads = Application.query.filter_by(program_id=pid, status="enrolled")\
+                             .order_by(Application.submitted_at).all()
+    return render_template("admin/graduates.html", program=p, graduates=grads)
+
+
+@admin_bp.route("/applications/<int:aid>/certificate")
+@login_required
+@admin_required
+def certificate_download(aid):
+    a = Application.query.get_or_404(aid)
+    if a.status not in ("enrolled", "approved"):
+        flash("Certificate only available for approved or enrolled trainees.", "warning")
+        return redirect(url_for("admin.applications"))
+    pdf_bytes = generate_certificate(a.applicant.full_name, a.program.title)
+    filename = f"certificate_{a.id}_{a.applicant.last_name or 'trainee'}.pdf"
+    return send_file(BytesIO(pdf_bytes), mimetype="application/pdf",
+                     as_attachment=True, download_name=filename)
+
+
+# --- Register helper routes (settings + bulk email) ---
+register_settings_routes(admin_bp)
+register_bulk_routes(admin_bp)

@@ -49,3 +49,17 @@ flask seed
 
 # Run
 python wsgi.py
+
+### Image Presets
+
+All uploaded images are **center-cropped and resized automatically** to fixed dimensions:
+
+| Preset | Size | Aspect | Used for |
+|---|---|---|---|
+| `product` | 800×600 | 4:3 | Shop products |
+| `program` | 1200×675 | 16:9 | Training covers |
+| `news` | 1200×630 | 1.9:1 | Blog posts |
+| `video` | 1280×720 | 16:9 | Video thumbnails |
+| `hero` | 1920×1080 | 16:9 | Hero backgrounds |
+
+**To add a new preset**, edit `IMAGE_PRESETS` in `app/images.py`. That's the single source of truth.

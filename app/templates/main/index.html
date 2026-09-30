@@ -1,15 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="mn-hero">
-  <div class="container" style="position:relative">
-    <div class="col-lg-7">
-      <span style="display:inline-block;background:#8DC63F;color:#fff;padding:.25rem .8rem;border-radius:999px;font-family:'Oswald';font-size:.75rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem">Sierra Leone • Freetown</span>
-      <h1>Hands-on Electronics Training That Builds Futures</h1>
-      <p class="lead mb-4">A 3-month practical boot camp in electronics repair, replacement & maintenance — training up to <strong style="color:#8DC63F">80 youths annually</strong> to become entrepreneurs serving their communities.</p>
-      <a href="{{ url_for('training.apply') }}" class="btn-mn-primary" style="font-size:1rem;padding:.8rem 2rem">Apply Now</a>
-      <a href="{{ url_for('donors.index') }}" class="btn-mn-outline" style="font-size:1rem;padding:.8rem 2rem;color:#fff;border-color:#8DC63F;margin-left:.5rem">Support Us</a>
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-pill">Sierra Leone • Freetown</span>
+        <h1>Hands-on Electronics Training That Builds Futures</h1>
+        <p class="lead mb-4">
+          A 3-month practical boot camp in electronics repair, replacement &amp; maintenance —
+          training up to <strong style="color:#8DC63F">80 youths annually</strong>
+          to become entrepreneurs serving their communities.
+        </p>
+        <div class="hero-actions">
+          <a href="{{ url_for('training.apply') }}" class="btn-mn-primary" style="font-size:1rem;padding:.85rem 2rem">Apply Now</a>
+          <a href="{{ url_for('donors.index') }}" class="btn-mn-outline hero-outline">Support Us</a>
+        </div>
+      </div>
+      <div class="hero-badge-wrap">
+        <div class="badge-80">
+          <span class="num">80</span>
+          <span class="lbl">YOUTHS / YR</span>
+        </div>
+      </div>
     </div>
-    <div class="badge-80"><span class="num">80</span><span class="lbl">YOUTHS / YR</span></div>
   </div>
 </section>
 

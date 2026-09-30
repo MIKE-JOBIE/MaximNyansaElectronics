@@ -74,5 +74,14 @@ def create_app(config_object=None):
     def server_error(e):
         db.session.rollback()
         return render_template("errors/500.html"), 500
+    
+    @app.template_filter("img_url")
+    def img_url(path):
+        if not path:
+            return ""
+        if str(path).startswith(("http://", "https://")):
+            return path
+        from flask import url_for
+        return url_for("static", filename=path)
 
     return app

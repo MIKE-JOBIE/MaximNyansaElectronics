@@ -69,3 +69,39 @@ def health():
         "database": "ok" if db_ok else "error",
         "app": "maxim-nyansa-electronics",
     }), (200 if db_ok else 503)
+
+@main_bp.route("/robots.txt")
+def robots():
+    from flask import Response, url_for
+    sitemap = url_for("main.sitemap", _external=True)
+    body = f"User-agent: *\nAllow: /\nSitemap: {sitemap}\n"
+    return Response(body, mimetype="text/plain")
+
+
+@main_bp.route("/sitemap.xml")
+def sitemap():
+    from flask import Response, url_for
+    from ...models import Program, Product, Post, Resource
+
+    static_urls = [
+        url_for("main.index", _external=True),
+        url_for("main.about", _external=True),
+        url_for("main.impact", _external=True),
+        url_for("main.contact", _external=True),
+        url_for("training.index", _external=True),
+        url_for("shop.index", _external=True),
+        url_for("library.index", _external=True),
+        url_for("library.videos", _external=True),
+        url_for("donors.index", _external=True),
+    ]
+    dynamic = []
+    for p in Program.query.all():
+        dynamic.append(url_for("training.program_detail", slug=p.slug, _external=True))
+    for p in Product.query.filter_by(is_active=True).all():
+        dynamic.append(url_for("shop.product_detail", slug=p.slug, _external=True))
+    for r in Resource.query.all():
+        dynamic.append(url_for("library.resource", slug=r.slug, _external=True))
+
+    urls = "\n".join(f"  <url><loc>{u}</loc></url>" for u in (static_urls + dynamic))
+    xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>'
+    return Response(xml, mimetype="application/xml")

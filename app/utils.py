@@ -24,15 +24,30 @@ def _cloudinary_configured():
     ])
 
 
-def save_upload(file_storage, prefix=""):
+def save_upload(file_storage, prefix="", preset=None):
     """
-    Save uploaded file.
-    - If Cloudinary env vars are set → upload to Cloudinary, return the full URL.
-    - Otherwise → save locally under static/uploads/, return 'uploads/filename'.
+    Save an uploaded file.
+    - If preset is set, the image is center-cropped + resized before saving.
+    - Cloudinary is used if configured; otherwise falls back to local storage.
     """
     if not file_storage or not file_storage.filename:
         return None
 
+    raw = file_storage.read()
+
+    # Resize if it's a preset image
+    if preset:
+        try:
+            from .images import resize_and_crop
+            raw = resize_and_crop(raw, preset)
+            ext = "jpg"
+        except Exception as e:
+            current_app.logger.warning(f"Image resize failed ({preset}): {e}")
+            ext = (file_storage.filename.rsplit(".", 1)[-1] or "jpg").lower()
+    else:
+        ext = (file_storage.filename.rsplit(".", 1)[-1] or "bin").lower()
+
+    # Cloudinary path
     if _cloudinary_configured():
         try:
             import cloudinary
@@ -44,22 +59,23 @@ def save_upload(file_storage, prefix=""):
                 secure=True,
             )
             result = cloudinary.uploader.upload(
-                file_storage,
+                raw,
                 folder="maxim_nyansa",
-                public_id=f"{prefix}{secrets.token_hex(6)}_{secure_filename(file_storage.filename).rsplit('.',1)[0]}",
-                resource_type="auto",
+                public_id=f"{prefix}{secrets.token_hex(6)}",
+                resource_type="image",
             )
             return result.get("secure_url")
         except Exception as e:
-            current_app.logger.error(f"Cloudinary upload failed, falling back to local: {e}")
-            # fall through to local save
+            current_app.logger.error(f"Cloudinary upload failed: {e}")
 
     # Local fallback
-    name = secure_filename(file_storage.filename)
     unique = secrets.token_hex(6)
-    fname = f"{prefix}{unique}_{name}"
+    safe_name = secure_filename(file_storage.filename or "upload") or "upload"
+    base = safe_name.rsplit(".", 1)[0] if "." in safe_name else safe_name
+    fname = f"{prefix}{unique}_{base}.{ext}"
     path = os.path.join(current_app.config["UPLOAD_FOLDER"], fname)
-    file_storage.save(path)
+    with open(path, "wb") as f:
+        f.write(raw)
     return f"uploads/{fname}"
 
 
