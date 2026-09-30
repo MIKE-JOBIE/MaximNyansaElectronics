@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Trainee Video Stories — {{ brand_name }}{% endblock %}
+{% block description %}Real voices from Maxim Nyansa Electronics trainees — their journeys, skills, and dreams.{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Trainee Voices</div>
+      <h2>Stories From the Workshop</h2>
+      <p class="text-muted" style="max-width:640px;margin:.5rem auto">
+        Real reflections from young people building skills, confidence, and livelihoods.
+      </p>
+    </div>
+
+    {% if videos %}
+      <div class="row">
+        {% for v in videos %}
+        <div class="col-md-6" style="margin-bottom:2rem">
+          <div class="mn-card" style="padding:1.2rem">
+            {% if v.thumbnail %}
+              <img src="{{ url_for('static', filename=v.thumbnail) }}"
+                   style="border-radius:8px;margin-bottom:1rem;width:100%;height:220px;object-fit:cover">
+            {% endif %}
+            <h5 style="margin:0 0 .3rem">{{ v.title }}</h5>
+            {% if v.trainee_name %}<p class="text-muted" style="font-size:.85rem;margin:0">— {{ v.trainee_name }}</p>{% endif %}
+            {% if v.description %}<p style="margin-top:.6rem">{{ v.description }}</p>{% endif %}
+            <div style="margin-top:1rem">
+              {% if 'youtube' in v.video_url or 'youtu.be' in v.video_url or 'vimeo' in v.video_url %}
+                <a href="{{ v.video_url }}" target="_blank" class="btn-mn-primary btn-sm">▶ Watch Video</a>
+              {% else %}
+                <video controls style="width:100%;border-radius:8px;margin-top:.5rem">
+                  <source src="{{ v.video_url }}">
+                </video>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center text-muted">No videos yet. Check back soon!</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

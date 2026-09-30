@@ -182,3 +182,26 @@ class SiteSetting(db.Model):
     @staticmethod
     def all_dict():
         return {s.key: s.value for s in SiteSetting.query.all()}
+    
+
+class VideoTestimonial(db.Model):
+    __tablename__ = "video_testimonials"
+    id           = db.Column(db.Integer, primary_key=True)
+    title        = db.Column(db.String(200), nullable=False)
+    trainee_name = db.Column(db.String(120))
+    description  = db.Column(db.Text)
+    video_url    = db.Column(db.String(500))  # YouTube/Vimeo embed URL or mp4
+    thumbnail    = db.Column(db.String(255))
+    program_id   = db.Column(db.Integer, db.ForeignKey("programs.id"), nullable=True)
+    featured     = db.Column(db.Boolean, default=False)
+    is_published = db.Column(db.Boolean, default=True)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
+    program = db.relationship("Program")
+
+
+    payment_ref   = db.Column(db.String(80), index=True)
+    payment_status= db.Column(db.String(20), default="unpaid")  # unpaid|paid|failed
+
+    payment_ref   = db.Column(db.String(80), index=True)
+    payment_status= db.Column(db.String(20), default="pledged")  # pledged|paid|failed

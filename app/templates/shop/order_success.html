@@ -10,3 +10,9 @@
   </div>
 </section>
 {% endblock %}
+
+{% if order.payment_status != 'paid' %}
+  <a href="{{ url_for('shop.pay', ref=order.reference) }}" class="btn-mn-primary" style="margin-top:1rem">Pay Now</a>
+{% else %}
+  <p style="color:#28a745;font-weight:bold">✅ Paid — thank you!</p>
+{% endif %}

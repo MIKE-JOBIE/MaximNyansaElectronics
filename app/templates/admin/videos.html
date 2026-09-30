@@ -1,0 +1,30 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header">
+  <h1>Video Testimonials</h1>
+  <a href="{{ url_for('admin.video_new') }}" class="btn-mn-primary btn-sm">+ New Video</a>
+</div>
+<table class="mn-table">
+  <thead><tr><th>Title</th><th>Trainee</th><th>Featured</th><th>Published</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for v in videos %}
+    <tr>
+      <td>{{ v.title }}</td>
+      <td>{{ v.trainee_name or '—' }}</td>
+      <td>{{ '⭐' if v.featured else '—' }}</td>
+      <td>{{ '✓' if v.is_published else '✗' }}</td>
+      <td>
+        <a class="btn-mn-outline btn-sm" href="{{ url_for('admin.video_edit', vid=v.id) }}">Edit</a>
+        <form method="POST" action="{{ url_for('admin.video_delete', vid=v.id) }}" style="display:inline"
+              onsubmit="return confirm('Delete this video?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn-mn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="text-muted">No videos yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

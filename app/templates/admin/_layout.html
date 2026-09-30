@@ -1,8 +1,12 @@
 {% extends "base.html" %}
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
 {% block content %}
 <div class="admin-layout">
   <aside class="admin-side">
+    <a href="{{ url_for('main.index') }}" class="admin-view-site">← View Public Site</a>
+
     <h6>Manage</h6>
     <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
     <a href="{{ url_for('admin.applications') }}">Applications</a>
@@ -12,10 +16,17 @@
     <a href="{{ url_for('admin.resources') }}">E-Library</a>
     <a href="{{ url_for('admin.donations') }}">Donations</a>
     <a href="{{ url_for('admin.messages') }}">Messages</a>
-    <a href="{{ url_for('admin.settings') }}">Settings</a>
-    <a href="{{ url_for('admin.bulk_email') }}">Bulk Email</a>
+    <a href="{{ url_for('admin.news') }}">News</a>
+    <a href="{{ url_for('admin.videos') }}">Videos</a>
   </aside>
   <main class="admin-main">
+    <div class="admin-topbar">
+      <div class="mode">
+        <span class="dot"></span>
+        <span>Admin Mode</span>
+      </div>
+      <a href="{{ url_for('main.index') }}" class="mode-link">View Public Site →</a>
+    </div>
     {% block admin %}{% endblock %}
   </main>
 </div>

@@ -35,7 +35,7 @@
       {% for p in products %}
       <div class="col-md-4">
         <div class="mn-card">
-          {% if p.image %}<img src="{{ url_for('static', filename=p.image) }}">{% else %}<img src="{{ url_for('static', filename='img/tools.svg') }}">{% endif %}
+          {% if p.image %}<img src="{{ p.image if p.image.startswith('http') else url_for('static', filename=p.image) }}">{% else %}<img src="{{ url_for('static', filename='img/tools.svg') }}">{% endif %}
           <div class="card-body">
             <h5>{{ p.name }}</h5>
             <span class="badge-status badge-{{ 'approved' if p.condition=='new' else 'pending' }}">{{ p.condition }}</span>

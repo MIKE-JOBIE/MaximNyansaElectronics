@@ -8,3 +8,60 @@
 .admin-header h1{font-family:'Bebas Neue';font-size:2rem;margin:0}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
 @media (max-width:820px){.admin-layout{grid-template-columns:1fr}.admin-side{display:flex;flex-wrap:wrap;gap:.3rem;padding:1rem}.admin-side a{flex:1 1 auto}.admin-side h6{flex-basis:100%;margin:.5rem 0 .2rem}}
+
+/* View Site button at top of admin sidebar */
+.admin-view-site{
+    display:block;
+    background:linear-gradient(135deg,#8DC63F,#6FA82E);
+    color:#fff !important;
+    padding:.7rem 1rem;
+    border-radius:8px;
+    text-align:center;
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    font-size:.8rem;
+    margin-bottom:1.2rem;
+    text-decoration:none;
+  }
+  .admin-view-site:hover{
+    background:linear-gradient(135deg,#6FA82E,#4F7A1F);
+    color:#fff !important;
+  }
+  
+  /* Admin top bar with mode indicator */
+  .admin-topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#fff;
+    padding:.6rem 1rem;
+    border-radius:8px;
+    margin-bottom:1rem;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+  }
+  .admin-topbar .mode{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    font-family:'Oswald',sans-serif;
+    font-size:.85rem;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:#4A4A4A;
+  }
+  .admin-topbar .mode .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:#8DC63F;
+    box-shadow:0 0 0 3px rgba(141,198,63,.25);
+  }
+  .admin-topbar .mode-link{
+    color:#6FA82E;
+    font-family:'Oswald',sans-serif;
+    font-size:.8rem;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    text-decoration:none;
+  }
+  .admin-topbar .mode-link:hover{text-decoration:underline}

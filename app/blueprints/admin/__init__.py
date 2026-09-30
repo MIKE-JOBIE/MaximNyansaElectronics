@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from ...models import (User, Program, Application, Product, Category,
-                       Order, Resource, Donation, Message, Post)
+                       Order, Resource, Donation, Message, Post, VideoTestimonial)
 from ...forms import ProgramForm, ProductForm, ResourceForm
 from ...extensions import db
 from ...utils import slugify, save_upload
@@ -15,6 +15,8 @@ from .bulk_routes import register_bulk_routes
 from flask import send_file
 from io import BytesIO
 from ...certificate import generate_certificate
+
+from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm, VideoForm
 
 admin_bp = Blueprint("admin", __name__, template_folder="../../templates/admin")
 
@@ -327,3 +329,69 @@ def certificate_download(aid):
                      as_attachment=True, download_name=filename)
 
 register_bulk_routes(admin_bp)
+
+# --- VIDEO TESTIMONIALS ---
+@admin_bp.route("/videos")
+@login_required
+@admin_required
+def videos():
+    vids = VideoTestimonial.query.order_by(VideoTestimonial.created_at.desc()).all()
+    return render_template("admin/videos.html", videos=vids)
+
+
+@admin_bp.route("/videos/new", methods=["GET", "POST"])
+@login_required
+@admin_required
+def video_new():
+    form = VideoForm()
+    form.program_id.choices = [(0, "— None —")] + [(p.id, p.title) for p in Program.query.all()]
+    if form.validate_on_submit():
+        thumb = save_upload(form.thumbnail.data, "vid_")
+        v = VideoTestimonial(
+            title=form.title.data, trainee_name=form.trainee_name.data,
+            description=form.description.data, video_url=form.video_url.data,
+            thumbnail=thumb,
+            program_id=(form.program_id.data or None),
+            featured=(form.featured.data == "yes"),
+            is_published=(form.is_published.data == "yes"))
+        db.session.add(v); db.session.commit()
+        flash("Video added.", "success")
+        return redirect(url_for("admin.videos"))
+    return render_template("admin/video_form.html", form=form, video=None)
+
+
+@admin_bp.route("/videos/<int:vid>/edit", methods=["GET", "POST"])
+@login_required
+@admin_required
+def video_edit(vid):
+    v = VideoTestimonial.query.get_or_404(vid)
+    form = VideoForm(obj=v)
+    form.program_id.choices = [(0, "— None —")] + [(p.id, p.title) for p in Program.query.all()]
+    if request.method == "GET":
+        form.featured.data = "yes" if v.featured else "no"
+        form.is_published.data = "yes" if v.is_published else "no"
+        form.program_id.data = v.program_id or 0
+    if form.validate_on_submit():
+        v.title = form.title.data
+        v.trainee_name = form.trainee_name.data
+        v.description = form.description.data
+        v.video_url = form.video_url.data
+        v.program_id = form.program_id.data or None
+        v.featured = (form.featured.data == "yes")
+        v.is_published = (form.is_published.data == "yes")
+        thumb = save_upload(form.thumbnail.data, "vid_")
+        if thumb: v.thumbnail = thumb
+        db.session.commit()
+        flash("Video updated.", "success")
+        return redirect(url_for("admin.videos"))
+    return render_template("admin/video_form.html", form=form, video=v)
+
+
+@admin_bp.route("/videos/<int:vid>/delete", methods=["POST"])
+@login_required
+@admin_required
+def video_delete(vid):
+    v = VideoTestimonial.query.get_or_404(vid)
+    db.session.delete(v); db.session.commit()
+    flash("Video deleted.", "info")
+    return redirect(url_for("admin.videos"))

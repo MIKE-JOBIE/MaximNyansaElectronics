@@ -24,3 +24,5 @@ databases:
     databaseName: maxim_nyansa
     user: maxim_admin
     plan: free
+
+    healthCheckPath: /health

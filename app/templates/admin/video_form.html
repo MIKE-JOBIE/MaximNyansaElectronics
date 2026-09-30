@@ -1,0 +1,16 @@
+{% extends "admin/_layout.html" %}
+{% block admin %}
+<div class="admin-header"><h1>{{ 'Edit Video' if video else 'New Video' }}</h1></div>
+<form method="POST" enctype="multipart/form-data" class="mn-form" style="margin-top:0;max-width:820px">
+  {{ form.hidden_tag() }}
+  <label>Title</label>{{ form.title() }}
+  <label>Trainee Name</label>{{ form.trainee_name() }}
+  <label>Description</label>{{ form.description(rows=4) }}
+  <label>Video URL (YouTube link, Vimeo link, or direct .mp4 URL)</label>{{ form.video_url() }}
+  <label>Program (optional)</label>{{ form.program_id() }}
+  <label>Thumbnail</label>{{ form.thumbnail() }}
+  <label>Featured</label>{{ form.featured() }}
+  <label>Published</label>{{ form.is_published() }}
+  <div style="margin-top:1.5rem">{{ form.submit(class="btn-mn-primary") }}</div>
+</form>
+{% endblock %}

@@ -16,3 +16,5 @@ def index():
 def resource(slug):
     r = Resource.query.filter_by(slug=slug).first_or_404()
     return render_template("library/resource.html", resource=r)
+
+from . import video_routes  # noqa

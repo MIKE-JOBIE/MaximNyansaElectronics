@@ -53,3 +53,19 @@ def impact():
         ),
     }
     return render_template("main/impact.html", stats=stats, site=site)
+
+@main_bp.route("/health")
+def health():
+    from flask import jsonify
+    from ...extensions import db
+    from sqlalchemy import text
+    try:
+        db.session.execute(text("SELECT 1"))
+        db_ok = True
+    except Exception:
+        db_ok = False
+    return jsonify({
+        "status": "ok" if db_ok else "degraded",
+        "database": "ok" if db_ok else "error",
+        "app": "maxim-nyansa-electronics",
+    }), (200 if db_ok else 503)

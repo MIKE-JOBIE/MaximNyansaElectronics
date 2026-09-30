@@ -3,6 +3,7 @@ from flask import Flask, render_template
 from .extensions import db, migrate, login_manager, csrf, mail
 from config import DevelopmentConfig, ProductionConfig, TestingConfig
 
+
 def create_app(config_object=None):
     app = Flask(__name__, instance_relative_config=True)
     if config_object:
@@ -13,8 +14,11 @@ def create_app(config_object=None):
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-    db.init_app(app); migrate.init_app(app, db)
-    login_manager.init_app(app); csrf.init_app(app); mail.init_app(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    csrf.init_app(app)
+    mail.init_app(app)
 
     from .blueprints.main     import main_bp
     from .blueprints.auth     import auth_bp
@@ -33,18 +37,22 @@ def create_app(config_object=None):
     app.register_blueprint(admin_bp,    url_prefix="/admin")
 
     from .models import User
+
     @login_manager.user_loader
-    def load_user(uid): return User.query.get(int(uid))
+    def load_user(uid):
+        return User.query.get(int(uid))
 
     @app.context_processor
     def inject_globals():
         from datetime import datetime
+        from flask import request as _req
         from .settings_utils import get_all_settings
         try:
             site = get_all_settings()
         except Exception:
             site = {}
         return {
+            "request": _req,
             "current_year": datetime.utcnow().year,
             "brand_name":   site.get("brand_name", "Maxim Nyansa Electronics"),
             "brand_phone":  site.get("brand_phone", "+232 31 950 662"),
@@ -57,7 +65,7 @@ def create_app(config_object=None):
     from .commands import register_commands
     register_commands(app)
 
-        # Error handlers
+    # Error handlers
     @app.errorhandler(404)
     def not_found(e):
         return render_template("errors/404.html"), 404

@@ -135,3 +135,48 @@ def my_orders():
 def order_detail(ref):
     o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
     return render_template("shop/order_detail.html", order=o)
+
+from ...payments import is_configured as paystack_ready, initialize_transaction, verify_transaction
+from flask import current_app
+
+
+@shop_bp.route("/pay/<ref>")
+@login_required
+def pay(ref):
+    o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
+    if not paystack_ready():
+        flash("Online payments not yet enabled. We'll contact you to arrange payment.", "info")
+        return redirect(url_for("shop.order_detail", ref=o.reference))
+    callback = url_for("shop.pay_callback", ref=o.reference, _external=True)
+    # Paystack expects amount in kobo (for NGN) or smallest unit. For SLE, use units.
+    amount_minor = int(float(o.total) * 100)
+    data = initialize_transaction(
+        email=current_user.email,
+        amount_minor=amount_minor,
+        reference=o.reference,
+        callback_url=callback,
+        metadata={"type": "order", "order_id": o.id, "user_id": current_user.id},
+    )
+    if not data:
+        flash("Could not start payment. Try again or contact us.", "danger")
+        return redirect(url_for("shop.order_detail", ref=o.reference))
+    o.payment_ref = o.reference
+    db.session.commit()
+    return redirect(data["authorization_url"])
+
+
+@shop_bp.route("/pay/callback/<ref>")
+@login_required
+def pay_callback(ref):
+    o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
+    data = verify_transaction(ref)
+    if data and data.get("status") == "success":
+        o.payment_status = "paid"
+        o.status = "paid"
+        db.session.commit()
+        flash(f"Payment received! Order {o.reference} confirmed.", "success")
+    else:
+        o.payment_status = "failed"
+        db.session.commit()
+        flash("Payment failed or was cancelled.", "warning")
+    return redirect(url_for("shop.order_detail", ref=o.reference))

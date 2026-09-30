@@ -117,3 +117,16 @@ class BulkEmailForm(FlaskForm):
     subject    = StringField("Subject", validators=[DataRequired(), Length(3, 200)])
     body       = TextAreaField("Message", validators=[DataRequired(), Length(10, 8000)])
     submit     = SubmitField("Send Bulk Email")
+
+
+class VideoForm(FlaskForm):
+    title        = StringField("Title", validators=[DataRequired(), Length(3, 200)])
+    trainee_name = StringField("Trainee Name (optional)", validators=[Optional(), Length(2, 120)])
+    description  = TextAreaField("Description (optional)", validators=[Optional()])
+    video_url    = StringField("Video URL (YouTube/Vimeo/MP4)",
+                               validators=[DataRequired(), Length(5, 500)])
+    program_id   = SelectField("Program (optional)", coerce=int, validators=[Optional()])
+    thumbnail    = FileField("Thumbnail (optional)")
+    featured     = SelectField("Featured?", choices=[("no","No"),("yes","Yes")], default="no")
+    is_published = SelectField("Published?", choices=[("yes","Yes"),("no","No")], default="yes")
+    submit       = SubmitField("Save Video")
