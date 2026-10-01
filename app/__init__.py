@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, current_app
 from .extensions import db, migrate, login_manager, csrf, mail
 from config import DevelopmentConfig, ProductionConfig, TestingConfig
 
@@ -83,5 +83,60 @@ def create_app(config_object=None):
             return path
         from flask import url_for
         return url_for("static", filename=path)
+    
+    @app.template_global()
+    def site_img(name, ext="jpg"):
+        """
+        Return URL to a site identity image.
+        - Looks for /static/img/site/{name}.{ext}
+        - Tries .jpg, .jpeg, .png, .webp automatically
+        - Falls back to /static/img/{name}.svg placeholder if none exist
+        """
+        import os
+        static_dir = current_app.static_folder
+        for candidate_ext in [ext, "jpg", "jpeg", "png", "webp"]:
+            path = os.path.join(static_dir, "img", "site", f"{name}.{candidate_ext}")
+            if os.path.exists(path):
+                from flask import url_for
+                return url_for("static", filename=f"img/site/{name}.{candidate_ext}")
+        # Fallback to SVG placeholder
+        from flask import url_for
+        return url_for("static", filename=f"img/{name}.svg")
+    
+        # ─── SECURITY HEADERS ────────────────────────────────────
+    @app.after_request
+    def add_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        # Content Security Policy — allows inline styles (needed for charts + brand colors)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "img-src 'self' data: https:; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "connect-src 'self'; "
+            "frame-ancestors 'self'; "
+            "base-uri 'self';"
+        )
+        return response
+    
+        # ─── FORCE HTTPS IN PRODUCTION ───────────────────────────
+    @app.before_request
+    def force_https():
+        from flask import request, redirect
+        if app.config.get("ENV") == "production" or not app.debug:
+            if request.headers.get("X-Forwarded-Proto", "http") == "http":
+                url = request.url.replace("http://", "https://", 1)
+                return redirect(url, code=301)
+            
+
+    # ─── RATE LIMITING ───────────────────────────────────────
+    from .extensions import limiter
+    if limiter:
+        limiter.init_app(app)
+            
 
     return app

@@ -105,3 +105,13 @@ def sitemap():
     urls = "\n".join(f"  <url><loc>{u}</loc></url>" for u in (static_urls + dynamic))
     xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>'
     return Response(xml, mimetype="application/xml")
+
+@main_bp.route("/favicon.ico")
+def favicon():
+    from flask import send_from_directory, current_app
+    import os
+    return send_from_directory(
+        os.path.join(current_app.root_path, "static", "img"),
+        "favicon.svg",
+        mimetype="image/svg+xml",
+    )

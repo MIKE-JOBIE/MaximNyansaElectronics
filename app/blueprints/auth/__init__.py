@@ -1,16 +1,30 @@
 import secrets
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
+
 from ...models import User, PasswordResetToken
-from ...forms import RegisterForm, LoginForm, ForgotPasswordForm, ResetPasswordForm, ProfileForm, ChangePasswordForm
-from ...extensions import db
+from ...forms import (RegisterForm, LoginForm, ForgotPasswordForm,
+                      ResetPasswordForm, ProfileForm, ChangePasswordForm)
+from ...extensions import db, limiter
 from ...email_utils import send_password_reset_email
+
 
 auth_bp = Blueprint("auth", __name__, template_folder="../../templates/auth")
 
 
+def _limit(rule):
+    """Conditional rate limit — falls back to no-op if Flask-Limiter is not installed."""
+    def wrapper(fn):
+        if limiter is None:
+            return fn
+        return limiter.limit(rule)(fn)
+    return wrapper
+
+
+# ─── REGISTER ────────────────────────────────────────────
 @auth_bp.route("/register", methods=["GET", "POST"])
+@_limit("5 per minute")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
@@ -19,8 +33,11 @@ def register():
         if User.query.filter_by(email=form.email.data.lower()).first():
             flash("Email already registered.", "danger")
         else:
-            u = User(email=form.email.data.lower(), first_name=form.first_name.data,
-                     last_name=form.last_name.data, phone=form.phone.data, role="trainee")
+            u = User(email=form.email.data.lower(),
+                     first_name=form.first_name.data,
+                     last_name=form.last_name.data,
+                     phone=form.phone.data,
+                     role="trainee")
             u.set_password(form.password.data)
             db.session.add(u)
             db.session.commit()
@@ -30,7 +47,9 @@ def register():
     return render_template("auth/register.html", form=form)
 
 
+# ─── LOGIN ───────────────────────────────────────────────
 @auth_bp.route("/login", methods=["GET", "POST"])
+@_limit("10 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
@@ -48,6 +67,7 @@ def login():
     return render_template("auth/login.html", form=form)
 
 
+# ─── LOGOUT ──────────────────────────────────────────────
 @auth_bp.route("/logout")
 @login_required
 def logout():
@@ -56,6 +76,7 @@ def logout():
     return redirect(url_for("main.index"))
 
 
+# ─── PROFILE ─────────────────────────────────────────────
 @auth_bp.route("/profile")
 @login_required
 def profile():
@@ -68,9 +89,9 @@ def profile_edit():
     form = ProfileForm(obj=current_user)
     if form.validate_on_submit():
         current_user.first_name = form.first_name.data
-        current_user.last_name  = form.last_name.data
-        current_user.phone      = form.phone.data
-        current_user.address    = form.address.data
+        current_user.last_name = form.last_name.data
+        current_user.phone = form.phone.data
+        current_user.address = form.address.data
         db.session.commit()
         flash("Profile updated.", "success")
         return redirect(url_for("auth.profile"))
@@ -92,7 +113,9 @@ def change_password():
     return render_template("auth/change_password.html", form=form)
 
 
+# ─── PASSWORD RESET ──────────────────────────────────────
 @auth_bp.route("/forgot-password", methods=["GET", "POST"])
+@_limit("3 per minute")
 def forgot_password():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
@@ -102,8 +125,11 @@ def forgot_password():
         # Always show success message — never reveal if email exists
         if u:
             token = secrets.token_urlsafe(48)
-            prt = PasswordResetToken(user_id=u.id, token=token,
-                                     expires_at=datetime.utcnow() + timedelta(hours=1))
+            prt = PasswordResetToken(
+                user_id=u.id,
+                token=token,
+                expires_at=datetime.utcnow() + timedelta(hours=1),
+            )
             db.session.add(prt)
             db.session.commit()
             reset_url = url_for("auth.reset_password", token=token, _external=True)

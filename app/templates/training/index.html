@@ -8,7 +8,7 @@
       {% for p in programs %}
       <div class="col-md-4">
         <div class="mn-card">
-          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.svg') }}">{% endif %}
+                  {% if p.cover_image %}<img src="{{ p.cover_image | img_url }}" class="img-16x9" alt="{{ p.title }}">{% else %}<img src="{{ site_img('cohort') }}" class="img-16x9" alt="{{ p.title }}">{% endif %}
           <div class="card-body">
             <h5>{{ p.title }}</h5>
             <p class="text-muted" style="font-size:.9rem">{{ p.summary }}</p>
@@ -23,4 +23,28 @@
     </div>
   </div>
 </section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Curriculum</div>
+      <h2>What You'll Learn</h2>
+    </div>
+    <div class="row">
+      <div class="col-md-4"><div class="mn-card" style="padding:1.5rem">
+        <h5>📱 Mobile &amp; Tablet Repair</h5>
+        <p class="text-muted" style="font-size:.9rem">Screen replacement, battery, charging ports, software diagnostics.</p>
+      </div></div>
+      <div class="col-md-4"><div class="mn-card" style="padding:1.5rem">
+        <h5>💻 Laptop &amp; Desktop</h5>
+        <p class="text-muted" style="font-size:.9rem">Motherboard diagnosis, RAM, storage, OS recovery, upgrades.</p>
+      </div></div>
+      <div class="col-md-4"><div class="mn-card" style="padding:1.5rem">
+        <h5>🔧 Soldering &amp; Components</h5>
+        <p class="text-muted" style="font-size:.9rem">Through-hole, SMD, component testing, board-level repair.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
 {% endblock %}

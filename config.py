@@ -27,6 +27,27 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     DEBUG = False
 
+    # Secure session cookies — HTTPS only, no JS access, strict same-site
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 7  # 7 days
+
+    # Content Security
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8MB upload cap
+    WTF_CSRF_TIME_LIMIT = 60 * 60  # CSRF token valid 1 hour
+
+    # Trust proxy headers from Render/Heroku/etc.
+    PREFERRED_URL_SCHEME = "https"
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    # Keep cookies working over http://localhost
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"

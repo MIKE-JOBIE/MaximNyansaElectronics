@@ -29,7 +29,17 @@
   .btn-sm{padding:.4rem 1rem!important;font-size:.8rem!important}
   
   /* Hero */
-  .mn-hero{background:linear-gradient(120deg,rgba(26,26,26,.78),rgba(26,26,26,.35)),url("../img/hero-training.jpg") center/cover no-repeat;min-height:72vh;display:flex;align-items:center;color:#fff;position:relative;padding:4rem 0}
+  .mn-hero{
+  background:
+    linear-gradient(120deg, rgba(26,26,26,.78), rgba(26,26,26,.35)),
+    var(--site-hero-img, url("../img/<img src="{{ site_img('cohort') }}" class="img-16x9">")) center/cover no-repeat;
+  min-height:72vh;
+  display:flex;
+  align-items:center;
+  color:#fff;
+  position:relative;
+  padding:4rem 0;
+}background:linear-gradient(120deg,rgba(26,26,26,.78),rgba(26,26,26,.35)),url("../img/hero-training.jpg") center/cover no-repeat;min-height:72vh;display:flex;align-items:center;color:#fff;position:relative;padding:4rem 0}
   .mn-hero h1{font-size:clamp(2.2rem,5.5vw,4rem);color:#fff;margin-bottom:1rem}
   .mn-hero p.lead{font-family:'Inter';color:#eee;font-size:1.05rem;max-width:560px}
   .badge-80{display:flex;flex-direction:column;align-items:center;justify-content:center;width:130px;height:130px;border-radius:50%;background:var(--accent-amber);font-family:'Bebas Neue',sans-serif;color:#1A1A1A;box-shadow:var(--shadow);position:absolute;right:6%;top:18%}

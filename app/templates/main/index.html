@@ -44,8 +44,11 @@
       {% for p in programs %}
       <div class="col-md-4">
         <div class="mn-card">
-          {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}" alt="{{ p.title }}">{% else %}<img src="{{ url_for('static', filename='img/hero-training.svg') }}" alt="">{% endif %}
-          <div class="card-body">
+          {% if p.cover_image %}
+          <img src="{{ p.cover_image | img_url }}" alt="{{ p.title }}" class="img-16x9">
+        {% else %}
+          <img src="{{ site_img('cohort') }}" alt="{{ p.title }}" class="img-16x9">
+        {% endif %}          <div class="card-body">
             <h5>{{ p.title }}</h5>
             <p class="text-muted" style="font-size:.9rem;margin:0">{{ p.summary }}</p>
             <a href="{{ url_for('training.program_detail', slug=p.slug) }}" class="btn-mn-outline btn-sm" style="margin-top:auto;align-self:flex-start">Learn more</a>
@@ -72,8 +75,7 @@
 <section class="section section-alt">
   <div class="container">
     <div class="row">
-      <div class="col-md-6"><img src="{{ url_for('static', filename='img/workshop.svg') }}" alt="Workshop" class="img-fluid"></div>
-      <div class="col-md-6">
+      <div class="col-md-6"><img src="{{ site_img('workshop') }}" alt="Workshop" class="img-4x3"></div>      <div class="col-md-6">
         <div class="section-head"><div class="eyebrow">From Training to Livelihood</div><h2>Learning That Leads to Enterprise</h2></div>
         <p>Graduates return to their communities and establish small electronics repair enterprises, providing affordable services while creating income for themselves and their families.</p>
         <p>Our vision is a network of community-based enterprises associated with the Maxim Nyansa Electronics identity.</p>
@@ -82,4 +84,54 @@
     </div>
   </div>
 </section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Our People</div>
+      <h2>The Cohort</h2>
+      <p class="text-muted" style="max-width:640px;margin:.5rem auto">
+        Young people preparing to learn, build, and lead.
+      </p>
+    </div>
+    <img src="{{ site_img('cohort') }}" alt="Cohort of trainees" class="img-16x9" style="border-radius:12px">
+  </div>
+</section>
+
+<!-- JOURNEY STRIP -->
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Our Journey</div>
+      <h2>From Idea to Enterprise</h2>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="mn-card" style="padding:1.8rem;border-top:5px solid #8DC63F">
+          <span class="badge-status badge-approved" style="margin-bottom:.8rem;display:inline-block">Completed</span>
+          <h5 style="font-family:'Bebas Neue';font-size:1.4rem">Phase One — Preparation</h5>
+          <p class="text-muted" style="font-size:.9rem">Generator, tools, workspace setup, first cohort selection.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="mn-card" style="padding:1.8rem;border-top:5px solid #8DC63F">
+          <span class="badge-status badge-approved" style="margin-bottom:.8rem;display:inline-block">Completed</span>
+          <h5 style="font-family:'Bebas Neue';font-size:1.4rem">Phase Two — First Training</h5>
+          <p class="text-muted" style="font-size:.9rem">13 trainees graduated · 90% practical · real-life exam.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="mn-card" style="padding:1.8rem;border-top:5px solid #F5A623">
+          <span class="badge-status badge-pending" style="margin-bottom:.8rem;display:inline-block">In Progress</span>
+          <h5 style="font-family:'Bebas Neue';font-size:1.4rem">Phase Three — Expansion</h5>
+          <p class="text-muted" style="font-size:.9rem">Electronics Shop · Refurbishment Center · scale to 80 youth/year.</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center" style="margin-top:2rem">
+      <a href="{{ url_for('main.about') }}" class="btn-mn-outline">Read Our Full Story</a>
+    </div>
+  </div>
+</section>
+
 {% endblock %}

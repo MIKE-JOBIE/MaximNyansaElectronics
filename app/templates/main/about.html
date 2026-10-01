@@ -1,24 +1,258 @@
 {% extends "base.html" %}
+{% block title %}About Us — {{ brand_name }}{% endblock %}
+{% block description %}Maxim Nyansa Electronics SL — a social-impact initiative training Sierra Leone's youth in electronics repair, entrepreneurship and sustainable enterprise.{% endblock %}
+
+{% block head %}
+<style>
+.about-hero{
+  background:linear-gradient(135deg,#1A1A1A 0%,#2d3a1f 100%);
+  color:#fff;padding:5rem 0 4rem;position:relative;overflow:hidden;
+}
+.about-hero::before{
+  content:"";position:absolute;top:-100px;right:-100px;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(141,198,63,.25),transparent 70%);
+}
+.about-hero h1{color:#fff;font-size:clamp(2.2rem,5vw,3.6rem);margin:0 0 1rem}
+.about-hero .lead{color:#cfd9c7;max-width:640px;font-size:1.05rem}
+
+.pill{display:inline-block;background:#8DC63F;color:#fff;padding:.3rem .9rem;border-radius:999px;font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:1rem}
+
+.vmv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin:2rem 0}
+.vmv-card{
+  background:#fff;border-radius:14px;padding:2rem 1.6rem;box-shadow:0 8px 30px rgba(0,0,0,.06);
+  border-top:5px solid #8DC63F;transition:.25s;
+}
+.vmv-card:hover{transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,.1)}
+.vmv-card h4{font-family:'Bebas Neue';font-size:1.5rem;color:#1A1A1A;margin:0 0 .6rem}
+.vmv-card p{color:#4A4A4A;font-size:.95rem;margin:0}
+.vmv-icon{width:48px;height:48px;background:#E8F5D0;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:#6FA82E;font-size:1.4rem}
+
+.objectives{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-top:1.5rem}
+.obj{display:flex;gap:.8rem;align-items:flex-start;padding:1rem;background:#F4F6F2;border-radius:10px}
+.obj-num{flex-shrink:0;width:32px;height:32px;background:#8DC63F;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:1.1rem}
+
+.structure-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:2rem}
+.structure-card{background:linear-gradient(180deg,#fff,#FAFCF7);border:1px solid #E8F5D0;border-radius:14px;padding:2rem 1.6rem;position:relative;overflow:hidden}
+.structure-card .num{position:absolute;top:-20px;right:-20px;font-family:'Bebas Neue';font-size:8rem;color:#E8F5D0;line-height:1;z-index:0}
+.structure-card h4{position:relative;font-family:'Bebas Neue';font-size:1.6rem;color:#1A1A1A;margin:0 0 1rem;z-index:1}
+.structure-card ul{position:relative;list-style:none;padding:0;margin:0;z-index:1}
+.structure-card li{padding:.4rem 0 .4rem 1.5rem;position:relative;font-size:.92rem;color:#4A4A4A}
+.structure-card li::before{content:"✓";position:absolute;left:0;color:#8DC63F;font-weight:bold}
+
+.timeline{position:relative;padding-left:2rem;margin-top:2rem}
+.timeline::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:#E8F5D0}
+.tl-item{position:relative;padding-bottom:2rem}
+.tl-item::before{content:"";position:absolute;left:-30px;top:6px;width:20px;height:20px;border-radius:50%;background:#8DC63F;border:3px solid #fff;box-shadow:0 0 0 2px #8DC63F}
+.tl-item.done::before{background:#8DC63F}
+.tl-item.active::before{background:#F5A623;animation:pulse 1.5s infinite}
+.tl-item.plan::before{background:#fff;border-color:#A7A9AC;box-shadow:0 0 0 2px #A7A9AC}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px #F5A623}50%{box-shadow:0 0 0 8px rgba(245,166,35,.3)}}
+.tl-item h4{font-family:'Bebas Neue';font-size:1.4rem;margin:0 0 .3rem;color:#1A1A1A}
+.tl-status{display:inline-block;font-family:'Oswald';font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;padding:.15rem .6rem;border-radius:999px;margin-left:.5rem;vertical-align:middle}
+.tl-status.done{background:#d4edda;color:#155724}
+.tl-status.active{background:#fff3cd;color:#856404}
+.tl-status.plan{background:#e2e3e5;color:#383d41}
+.tl-item p{color:#4A4A4A;font-size:.93rem;margin:.3rem 0 0}
+
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;margin-top:2rem}
+.team-card{text-align:center;padding:1.8rem;background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+.team-avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#8DC63F,#6FA82E);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:2rem;margin:0 auto 1rem}
+.team-card h5{margin:0;font-family:'Bebas Neue';font-size:1.2rem;color:#1A1A1A}
+.team-card .role{color:#6FA82E;font-family:'Oswald';font-size:.78rem;letter-spacing:1px;text-transform:uppercase;margin:.3rem 0 0}
+
+.partners-grid{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:2rem}
+.partner-chip{background:#fff;border:1px solid #E8F5D0;border-radius:999px;padding:.6rem 1.4rem;font-family:'Oswald';font-size:.85rem;color:#4A4A4A;font-weight:500}
+
+.cta-band{background:linear-gradient(135deg,#8DC63F,#6FA82E);color:#fff;padding:3rem 0;text-align:center;border-radius:20px;margin:3rem 0 0}
+.cta-band h2{color:#fff;font-family:'Bebas Neue';font-size:2.4rem;margin:0 0 .8rem}
+.cta-band p{color:#f0f7e5;max-width:600px;margin:0 auto 1.5rem}
+</style>
+{% endblock %}
+
 {% block content %}
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="container" style="position:relative;z-index:1">
+    <span class="pill">Who We Are</span>
+    <h1>Empowering Youth Through Skills, Enterprise & Community</h1>
+    <p class="lead">Maxim Nyansa Electronics Enterprises SL is a social-impact initiative under Maxim Nyansa Foundation Sierra Leone, turning unemployed young people into skilled technicians, entrepreneurs and community builders.</p>
+  </div>
+</section>
+
+<!-- VISION · MISSION · VALUES -->
 <section class="section">
   <div class="container">
-    <div class="section-head text-center"><div class="eyebrow">About Us</div><h2>The Learning Company</h2></div>
-    <div class="prose" style="max-width:820px;margin:0 auto">
-      <p><strong>Maxim Nyansa Electronics Enterprises SL</strong> is a social-impact initiative combining practical vocational training, electronics repair and refurbishment, youth enterprise development, and a planned electronics shop.</p>
-      <h3>Our Vision</h3>
-      <p>The Learning Company exists to create practical pathways for young people who may have limited access to conventional higher education. The model emphasizes hands-on technical competence, entrepreneurship, and the ability to earn a livelihood by providing useful repair services in local communities.</p>
-      <h3>Our Structure</h3>
-      <p>Three mutually reinforcing functions:</p>
-      <ul>
-        <li>A <strong>training center</strong> for vocational learning and administration.</li>
-        <li>A <strong>refurbishment and repair function</strong> for faulty electronic equipment and practical work.</li>
-        <li>An <strong>electronics shop</strong> selling new or slightly used equipment, generating income to support local operations and future learning.</li>
-      </ul>
-      <h3>Sustainability</h3>
-      <p>Our sustainability model combines affordable repair services, sales of electronic equipment, refurbishment and reuse, reinvestment of operating revenue, alumni mentorship and continued partnerships — moving progressively from donor-supported establishment toward a stronger locally-generated operating base while preserving the social mission.</p>
-      <h3>Partners</h3>
-      <p>We acknowledge the contribution of Maxim Nyansa Foundation, Climbing The Right Tree, Lufthansa Help Alliance, Wessel Hebing, Vivace and other supporters.</p>
+    <div class="section-head text-center">
+      <div class="eyebrow">Foundation</div>
+      <h2>Vision, Mission &amp; Values</h2>
+    </div>
+    <div class="vmv-grid">
+      <div class="vmv-card">
+        <div class="vmv-icon">🎯</div>
+        <h4>Our Vision</h4>
+        <p>To become one of the leading youth empowerment and technical vocational institutions in Sierra Leone by transforming unemployed youths into skilled technicians and entrepreneurs.</p>
+      </div>
+      <div class="vmv-card">
+        <div class="vmv-icon">🤝</div>
+        <h4>Our Mission</h4>
+        <p>To provide practical ICT and electronics repair training while building sustainable social enterprises capable of supporting long-term youth empowerment and community development.</p>
+      </div>
+      <div class="vmv-card">
+        <div class="vmv-icon">🌱</div>
+        <h4>Our Values</h4>
+        <p>Integrity, affordability, technical excellence, self-reliance, and sustainability. Every graduate becomes both an entrepreneur and a contributor to their community.</p>
+      </div>
     </div>
   </div>
 </section>
+
+<!-- OBJECTIVES -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">What We're Building</div>
+      <h2>Core Objectives</h2>
+    </div>
+    <div class="objectives">
+      <div class="obj"><div class="obj-num">1</div><div>Train up to <strong>80 youths annually</strong> in electronics repair and entrepreneurship.</div></div>
+      <div class="obj"><div class="obj-num">2</div><div>Establish sustainable <strong>electronics repair enterprises</strong> across communities.</div></div>
+      <div class="obj"><div class="obj-num">3</div><div>Reduce <strong>unemployment</strong> among disadvantaged and underserved youths.</div></div>
+      <div class="obj"><div class="obj-num">4</div><div>Promote <strong>entrepreneurship and self-reliance</strong> at the grassroots level.</div></div>
+      <div class="obj"><div class="obj-num">5</div><div>Reduce <strong>electronic waste</strong> through refurbishment and reuse.</div></div>
+      <div class="obj"><div class="obj-num">6</div><div>Build a <strong>self-sustaining training and enterprise ecosystem</strong>.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STRUCTURE -->
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">How We Work</div>
+      <h2>Three Interconnected Functions</h2>
+      <p class="text-muted" style="max-width:640px;margin:.5rem auto 0">A single ecosystem where learning, repair, and commerce feed each other — creating sustainable impact.</p>
+    </div>
+    <div class="structure-grid">
+      <div class="structure-card">
+        <div class="num">01</div>
+        <h4>The Learning Company</h4>
+        <ul>
+          <li>Vocational ICT &amp; electronics repair training</li>
+          <li>Entrepreneurship development</li>
+          <li>Mentorship &amp; monitoring</li>
+          <li>Community technical support</li>
+          <li>Practical workshops &amp; examinations</li>
+        </ul>
+      </div>
+      <div class="structure-card">
+        <div class="num">02</div>
+        <h4>Refurbishment Center</h4>
+        <ul>
+          <li>Repair damaged electronics</li>
+          <li>Restore reusable equipment</li>
+          <li>Reduce electronic waste</li>
+          <li>Hands-on learning opportunities</li>
+          <li>Affordable restored devices for the community</li>
+        </ul>
+      </div>
+      <div class="structure-card">
+        <div class="num">03</div>
+        <h4>Electronics Shop</h4>
+        <ul>
+          <li>Sell slightly-used electronics</li>
+          <li>Sell selected new electronics</li>
+          <li>Technical support services</li>
+          <li>Generate operational revenue</li>
+          <li>Sustain training &amp; organization</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY / TIMELINE -->
+<section class="section section-alt">
+  <div class="container" style="max-width:820px">
+    <div class="section-head text-center">
+      <div class="eyebrow">Our Journey</div>
+      <h2>From Idea to Enterprise</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-item done">
+        <h4>Phase One — Preparation <span class="tl-status done">Completed</span></h4>
+        <p>Secured standby generator, purchased training tools &amp; equipment, renovated the training hall, recruited trainers, and selected the first cohort of trainees. Foundational support provided by Maxim Nyansa Foundation, Climbing The Right Tree, Wessel Hebing and Vivace.</p>
+      </div>
+      <div class="tl-item done">
+        <h4>Phase Two — First Vocational Program <span class="tl-status done">Completed</span></h4>
+        <p>Successfully completed the first Vocational Training Program in Electronics Repairs &amp; Maintenance with <strong>13 graduates</strong>. Intensive two-month training, 90% practical, real-life repair examinations, entrepreneurship mentoring. Supported by Maxim Nyansa Foundation, Climbing The Right Tree and Lufthansa Help Alliance.</p>
+      </div>
+      <div class="tl-item active">
+        <h4>Phase Three — Expansion <span class="tl-status active">In Progress</span></h4>
+        <p>Establishing the main Electronics Shop, dedicated Refurbishment Center, procuring inventory, and expanding operations. Seeking support to scale from 13 to 80 trained youths per year.</p>
+      </div>
+      <div class="tl-item plan">
+        <h4>Phase Four — National Reach <span class="tl-status plan">Planned</span></h4>
+        <p>Expand to additional communities across Sierra Leone, develop online learning resources, and build a regional network of graduate-owned enterprises.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Our People</div>
+      <h2>Team &amp; Leadership</h2>
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">MM</div>
+        <h5>Michael Jobie Musa</h5>
+        <p class="role">Country Director</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🎓</div>
+        <h5>Training Team</h5>
+        <p class="role">Electronics Instructors</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🤝</div>
+        <h5>Coordinators</h5>
+        <p class="role">Program &amp; Mentorship</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERS -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head text-center">
+      <div class="eyebrow">Thank You</div>
+      <h2>Our Supporters</h2>
+      <p class="text-muted" style="max-width:640px;margin:.5rem auto 0">Their generosity made Phases One and Two possible.</p>
+    </div>
+    <div class="partners-grid">
+      <div class="partner-chip">Maxim Nyansa Foundation</div>
+      <div class="partner-chip">Climbing The Right Tree</div>
+      <div class="partner-chip">Lufthansa Help Alliance</div>
+      <div class="partner-chip">Wessel Hebing</div>
+      <div class="partner-chip">Vivace</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="container">
+  <div class="cta-band">
+    <h2>Be Part of the Next Chapter</h2>
+    <p>Every contribution trains a young person with real, marketable skills — building enterprise, dignity and hope across Sierra Leone.</p>
+    <a href="{{ url_for('donors.index') }}" class="btn-mn-primary" style="background:#fff;color:#6FA82E;font-size:1rem;padding:.85rem 2rem">Support Our Work</a>
+    <a href="{{ url_for('training.apply') }}" class="btn-mn-outline" style="border-color:#fff;color:#fff;font-size:1rem;padding:.85rem 2rem;margin-left:.5rem">Apply for Training</a>
+  </div>
+</section>
+
 {% endblock %}
