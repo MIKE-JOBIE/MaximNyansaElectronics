@@ -1,9 +1,12 @@
 services:
   - type: web
-    name: maxim-nyansa-app
+    name: maxim-nyansa-electronics
     env: python
+    plan: free
+    region: frankfurt
     buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed"
-    startCommand: "gunicorn wsgi:app"
+    startCommand: "gunicorn wsgi:app --bind 0.0.0.0:$PORT"
+    healthCheckPath: /
     envVars:
       - key: FLASK_ENV
         value: production
@@ -12,17 +15,30 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: DATABASE_URL
-        fromDatabase:
-          name: maxim-nyansa-db
-          property: connectionString
+        sync: false
       - key: ADMIN_EMAIL
         value: admin@maximnyansa.com
       - key: ADMIN_PASSWORD
         sync: false
-databases:
-  - name: maxim-nyansa-db
-    databaseName: maxim_nyansa
-    user: maxim_admin
-    plan: free
-
-    healthCheckPath: /health
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USE_TLS
+        value: "True"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        value: info@maximnyansa.com
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
