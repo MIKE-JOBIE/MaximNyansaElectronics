@@ -20,11 +20,10 @@
     <a href="{{ url_for('admin.donations') }}">Donations</a>
     <a href="{{ url_for('admin.messages') }}">Messages</a>
     <a href="{{ url_for('admin.videos') }}">Videos</a>
-    {% if config.get('BATCH_3_ENABLED', False) %}
-      <a href="{{ url_for('admin.settings') }}">Settings</a>
-      <a href="{{ url_for('admin.bulk_email') }}">Bulk Email</a>
-      <a href="{{ url_for('admin.news') }}">News</a>
-    {% endif %}
+    <a href="{{ url_for('admin.settings') }}">Settings</a>
+    <a href="{{ url_for('admin.bulk_email') }}">Bulk Email</a>
+    <a href="{{ url_for('admin.news') }}">News</a>
+    <a href="{{ url_for('admin.videos') }}">Videos</a>
 
     <h6 style="margin-top:1.5rem">Signed in</h6>
     <div style="color:#A7A9AC;font-size:.8rem;padding:.3rem .8rem">
