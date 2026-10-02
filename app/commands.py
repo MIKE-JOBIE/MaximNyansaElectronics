@@ -5,6 +5,7 @@ from .extensions import db
 from .models import User, Program, Category, Product, Resource, Post
 from .utils import slugify
 
+
 def register_commands(app):
     @app.cli.command("seed")
     @with_appcontext
@@ -12,20 +13,19 @@ def register_commands(app):
         """Create admin, sample programs, categories, products."""
         from flask import current_app
         admin_email = current_app.config["ADMIN_EMAIL"]
-        admin_pass  = current_app.config["ADMIN_PASSWORD"]
+        admin_pass = current_app.config["ADMIN_PASSWORD"]
 
-        from .settings_utils import seed_default_settings
-        seed_default_settings()
-        click.echo("✔ Site settings seeded")
-
+        # ─── ADMIN USER ─────────────────────────────────────
         if not User.query.filter_by(email=admin_email).first():
             u = User(email=admin_email, first_name="Admin", last_name="Maxim", role="admin")
             u.set_password(admin_pass)
             db.session.add(u)
             click.echo(f"✔ Admin created: {admin_email}")
+        else:
+            click.echo(f"ℹ Admin already exists: {admin_email}")
 
+        # ─── PROGRAMS ───────────────────────────────────────
         if Program.query.count() == 0:
-            from datetime import date, timedelta
             p1 = Program(
                 title="3-Month Electronics Repair, Replacement & Maintenance Boot Camp",
                 slug=slugify("3-Month Electronics Repair Replacement Maintenance Boot Camp"),
@@ -54,7 +54,11 @@ def register_commands(app):
                 ),
                 start_date=date.today() + timedelta(days=30),
                 end_date=date.today() + timedelta(days=120),
-                capacity=20, fee=0, status="open")
+                capacity=20,
+                fee=0,
+                status="open",
+            )
+
             p2 = Program(
                 title="NGO Staff & Volunteers — One Week Practical ICT Training",
                 slug=slugify("NGO Staff Volunteers One Week Practical ICT Training"),
@@ -88,16 +92,24 @@ def register_commands(app):
                 ),
                 start_date=date.today() + timedelta(days=45),
                 end_date=date.today() + timedelta(days=52),
-                capacity=15, fee=400, status="open")
+                capacity=15,
+                fee=400,
+                status="open",
+            )
+
             db.session.add_all([p1, p2])
             click.echo("✔ Programs seeded")
+        else:
+            click.echo(f"ℹ Programs already exist ({Program.query.count()})")
 
+        # ─── CATEGORIES ─────────────────────────────────────
         cats = ["Laptops", "Phones", "Accessories", "Tools"]
         for c in cats:
             if not Category.query.filter_by(name=c).first():
                 db.session.add(Category(name=c, slug=slugify(c)))
         db.session.commit()
 
+        # ─── PRODUCTS ───────────────────────────────────────
         if Product.query.count() == 0:
             cat = Category.query.first()
             samples = [
@@ -108,25 +120,45 @@ def register_commands(app):
             ]
             for name, desc, price, cond in samples:
                 db.session.add(Product(
-                    name=name, slug=slugify(name), description=desc,
-                    price=price, stock=10, condition=cond,
-                    category_id=cat.id, is_active=True))
+                    name=name,
+                    slug=slugify(name),
+                    description=desc,
+                    price=price,
+                    stock=10,
+                    condition=cond,
+                    category_id=cat.id,
+                    is_active=True,
+                ))
             click.echo("✔ Sample products seeded")
 
+        # ─── E-LIBRARY ──────────────────────────────────────
         if Resource.query.count() == 0:
-            for t, c in [("Electronics Fundamentals Handbook", "Handbook"),
-                         ("Soldering Best Practices", "Guide"),
-                         ("Board-Level Repair Manual", "Manual"),
-                         ("Starting Your Repair Business", "Entrepreneurship")]:
-                db.session.add(Resource(title=t, slug=slugify(t),
-                    description=f"Reference material — {t}", category=c,
-                    file_url="#"))
+            for t, c in [
+                ("Electronics Fundamentals Handbook", "Handbook"),
+                ("Soldering Best Practices", "Guide"),
+                ("Board-Level Repair Manual", "Manual"),
+                ("Starting Your Repair Business", "Entrepreneurship"),
+            ]:
+                db.session.add(Resource(
+                    title=t,
+                    slug=slugify(t),
+                    description=f"Reference material — {t}",
+                    category=c,
+                    file_url="#",
+                ))
             click.echo("✔ E-Library seeded")
 
+        # ─── NEWS ───────────────────────────────────────────
         if Post.query.count() == 0:
             db.session.add(Post(
                 title="First cohort graduates 13 trainees",
                 slug=slugify("First cohort graduates 13 trainees"),
-                body="Our first Vocational Training Programme in Electronic Repairs and Maintenance has successfully completed with 13 trainees. Approximately 90% of learning was practical."))
+                body=(
+                    "Our first Vocational Training Programme in Electronic Repairs and Maintenance "
+                    "has successfully completed with 13 trainees. Approximately 90% of learning was practical."
+                ),
+            ))
+            click.echo("✔ News post seeded")
+
         db.session.commit()
         click.echo("✅ Seed complete.")
