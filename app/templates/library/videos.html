@@ -1,6 +1,60 @@
 {% extends "base.html" %}
 {% block title %}Trainee Video Stories — {{ brand_name }}{% endblock %}
-{% block description %}Real voices from Maxim Nyansa Electronics trainees — their journeys, skills, and dreams.{% endblock %}
+{% block description %}Real voices from Maxim Nyansa Electronics trainees.{% endblock %}
+
+{% block head %}
+<style>
+/* Video card — fixed max height so portrait videos don't dominate */
+.vid-card{
+  background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.07);transition:.25s;
+  display:flex;flex-direction:column;height:100%;
+}
+.vid-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.12)}
+
+.vid-frame{
+  background:#000;
+  aspect-ratio:16/9;          /* letterbox container */
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;
+}
+.vid-frame video,
+.vid-frame iframe{
+  width:100%;height:100%;
+  object-fit:contain;         /* key: keep whole video visible, no crop */
+  display:block;border:0;
+}
+
+.vid-body{padding:1.2rem 1.4rem 1.4rem}
+.vid-body h5{margin:0 0 .3rem;font-family:'Bebas Neue';font-size:1.2rem;color:#1A1A1A}
+.vid-body .trainee{color:#6FA82E;font-family:'Oswald';font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 .6rem}
+.vid-body p{color:#555;font-size:.9rem;margin:0;line-height:1.55}
+</style>
+{% endblock %}
+
+{% macro video_embed(url) %}
+  {% if 'youtube.com/watch' in url %}
+    {% set yt_id = url.split('v=')[1].split('&')[0] %}
+    <iframe src="https://www.youtube.com/embed/{{ yt_id }}"
+            allowfullscreen loading="lazy" title="Video"></iframe>
+  {% elif 'youtu.be/' in url %}
+    {% set yt_id = url.split('youtu.be/')[1].split('?')[0] %}
+    <iframe src="https://www.youtube.com/embed/{{ yt_id }}"
+            allowfullscreen loading="lazy" title="Video"></iframe>
+  {% elif 'youtube.com/embed/' in url %}
+    <iframe src="{{ url }}" allowfullscreen loading="lazy" title="Video"></iframe>
+  {% elif 'vimeo.com/' in url %}
+    {% set vimeo_id = url.rstrip('/').split('/')[-1].split('?')[0] %}
+    <iframe src="https://player.vimeo.com/video/{{ vimeo_id }}"
+            allowfullscreen loading="lazy" title="Video"></iframe>
+  {% else %}
+    <video controls preload="metadata">
+      <source src="{{ url }}">
+      Your browser does not support video playback.
+    </video>
+  {% endif %}
+{% endmacro %}
+
 {% block content %}
 <section class="section">
   <div class="container">
@@ -16,21 +70,19 @@
       <div class="row">
         {% for v in videos %}
         <div class="col-md-6" style="margin-bottom:2rem">
-          <div class="mn-card" style="padding:1.2rem">
-            {% if v.thumbnail %}
-              <img src="{{ url_for('static', filename=v.thumbnail) }}"
-                   style="border-radius:8px;margin-bottom:1rem;width:100%;height:220px;object-fit:cover">
-            {% endif %}
-            <h5 style="margin:0 0 .3rem">{{ v.title }}</h5>
-            {% if v.trainee_name %}<p class="text-muted" style="font-size:.85rem;margin:0">— {{ v.trainee_name }}</p>{% endif %}
-            {% if v.description %}<p style="margin-top:.6rem">{{ v.description }}</p>{% endif %}
-            <div style="margin-top:1rem">
-              {% if 'youtube' in v.video_url or 'youtu.be' in v.video_url or 'vimeo' in v.video_url %}
-                <a href="{{ v.video_url }}" target="_blank" class="btn-mn-primary btn-sm">▶ Watch Video</a>
-              {% else %}
-                <video controls style="width:100%;border-radius:8px;margin-top:.5rem">
-                  <source src="{{ v.video_url }}">
-                </video>
+          <div class="vid-card">
+            <div class="vid-frame">
+              {% if v.video_url %}
+                {{ video_embed(v.video_url) }}
+              {% endif %}
+            </div>
+            <div class="vid-body">
+              <h5>{{ v.title }}</h5>
+              {% if v.trainee_name %}
+                <p class="trainee">{{ v.trainee_name }}</p>
+              {% endif %}
+              {% if v.description %}
+                <p>{{ v.description }}</p>
               {% endif %}
             </div>
           </div>
@@ -38,7 +90,9 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="text-center text-muted">No videos yet. Check back soon!</p>
+      <p class="text-center text-muted" style="padding:3rem 0">
+        No videos yet. Check back soon!
+      </p>
     {% endif %}
   </div>
 </section>

@@ -115,3 +115,7 @@ def favicon():
         "favicon.svg",
         mimetype="image/svg+xml",
     )
+
+@main_bp.route("/developer")
+def developer():
+    return render_template("main/developer.html")

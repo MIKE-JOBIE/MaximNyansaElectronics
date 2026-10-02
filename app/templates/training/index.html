@@ -1,49 +1,168 @@
 {% extends "base.html" %}
+{% block title %}Training Programs — {{ brand_name }}{% endblock %}
+{% block description %}Practical electronics repair and ICT training programs in Freetown, Sierra Leone.{% endblock %}
+
+{% block head %}
+<style>
+.tr-hero{
+  background:linear-gradient(135deg,#1A1A1A,#2d3a1f);
+  color:#fff;padding:5rem 0 4rem;text-align:center;position:relative;overflow:hidden;
+}
+.tr-hero::before{
+  content:"";position:absolute;top:-50%;right:-10%;width:500px;height:500px;
+  border-radius:50%;background:radial-gradient(circle,rgba(141,198,63,.2),transparent 70%);
+}
+.tr-hero h1{color:#fff;font-size:clamp(2.2rem,5vw,3.6rem);margin:0 0 1rem}
+.tr-hero p{color:#cfd9c7;max-width:640px;margin:0 auto}
+
+.tr-section{padding:5rem 0}
+.tr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem}
+.tr-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.08);transition:.3s;display:flex;flex-direction:column;border:1px solid #eee}
+.tr-card:hover{transform:translateY(-6px);box-shadow:0 20px 44px rgba(0,0,0,.13);border-color:#8DC63F}
+.tr-card .tr-img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#F4F6F2}
+.tr-card .tr-body{padding:1.8rem;flex:1;display:flex;flex-direction:column;gap:.7rem}
+.tr-card h3{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:#1A1A1A;margin:0;line-height:1.15}
+.tr-card .meta-row{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:'Oswald',sans-serif;font-size:.78rem;letter-spacing:.5px;text-transform:uppercase;color:#6FA82E}
+.tr-card p{font-size:.92rem;color:#555;margin:.4rem 0;flex:1;line-height:1.6}
+.tr-card .price-line{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#6FA82E;margin:.4rem 0}
+.tr-card .price-line .free{color:#28a745}
+
+/* Includes grid */
+.includes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:2rem}
+.include-chip{
+  background:#fff;border:1px solid #E8F5D0;border-radius:12px;padding:1rem 1.2rem;
+  display:flex;align-items:center;gap:.8rem;transition:.2s;
+}
+.include-chip:hover{border-color:#8DC63F;transform:translateX(4px)}
+.include-chip .ic{width:36px;height:36px;background:#E8F5D0;color:#6FA82E;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.include-chip span{font-family:'Oswald',sans-serif;font-size:.85rem;color:#1A1A1A;font-weight:500}
+
+/* CTA row */
+.tr-cta{background:linear-gradient(135deg,#8DC63F,#6FA82E);color:#fff;padding:3rem 2rem;text-align:center;border-radius:20px;margin:3rem auto;max-width:900px}
+.tr-cta h2{color:#fff;font-family:'Bebas Neue',sans-serif;font-size:2.2rem;margin:0 0 1rem}
+.tr-cta p{color:#f0f7e5;max-width:560px;margin:0 auto 1.5rem}
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="section">
+
+<section class="tr-hero">
+  <div class="container" style="position:relative;z-index:1">
+    <span class="hero-pill">Learn · Build · Earn</span>
+    <h1>Training Programs</h1>
+    <p>Practical, hands-on training designed to build marketable skills — electronics repair, ICT proficiency, and entrepreneurship.</p>
+  </div>
+</section>
+
+<!-- ═══ PROGRAMS ═══ -->
+<section class="tr-section">
   <div class="container">
-    <div class="section-head text-center"><div class="eyebrow">Training Programs</div><h2>Learn a Skill That Pays</h2>
-    <p class="text-muted">3-Month Electronics Repair, Replacement & Maintenance Boot Camp</p></div>
-    <div class="row">
+    <div class="section-head text-center">
+      <div class="eyebrow">Open Enrollment</div>
+      <h2>Current Programs</h2>
+    </div>
+
+    <div class="tr-grid">
       {% for p in programs %}
-      <div class="col-md-4">
-        <div class="mn-card">
-                  {% if p.cover_image %}<img src="{{ p.cover_image | img_url }}" class="img-16x9" alt="{{ p.title }}">{% else %}<img src="{{ site_img('cohort') }}" class="img-16x9" alt="{{ p.title }}">{% endif %}
-          <div class="card-body">
-            <h5>{{ p.title }}</h5>
-            <p class="text-muted" style="font-size:.9rem">{{ p.summary }}</p>
-            <div class="d-flex gap-2 align-items-center" style="margin-top:auto">
-              <span class="badge-status badge-{{ 'approved' if p.status=='open' else 'rejected' }}">{{ p.status }}</span>
-              <a href="{{ url_for('training.program_detail', slug=p.slug) }}" class="btn-mn-outline btn-sm">Details</a>
-            </div>
+      <div class="tr-card">
+        {% if p.cover_image %}
+          <img src="{{ p.cover_image | img_url }}" alt="{{ p.title }}" class="tr-img">
+        {% else %}
+          <img src="{{ site_img('cohort') }}" alt="{{ p.title }}" class="tr-img">
+        {% endif %}
+        <div class="tr-body">
+          {% if p.status == 'open' %}
+            <span class="badge-status badge-approved" style="align-self:flex-start">Open for Applications</span>
+          {% endif %}
+          <h3>{{ p.title }}</h3>
+          <div class="meta-row">
+            {% if p.start_date %}<span>📅 Starts {{ p.start_date.strftime('%b %d, %Y') }}</span>{% endif %}
+            <span>🎯 {{ p.capacity }} seats</span>
+          </div>
+          <p>{{ p.summary }}</p>
+          {% if p.fee and p.fee > 0 %}
+            <div class="price-line">Le {{ '{:,.0f}'.format(p.fee) }}</div>
+          {% else %}
+            <div class="price-line"><span class="free">Free</span> <span style="font-size:.9rem;color:#888;font-family:'Inter'">(donor-supported)</span></div>
+          {% endif %}
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:auto">
+            <a href="{{ url_for('training.program_detail', slug=p.slug) }}" class="btn-mn-outline btn-sm">Details</a>
+            {% if p.status == 'open' %}
+              <a href="{{ url_for('training.apply') }}?program_id={{ p.id }}" class="btn-mn-primary btn-sm">Apply Now</a>
+            {% endif %}
           </div>
         </div>
       </div>
+      {% else %}
+        <p class="text-center text-muted" style="grid-column:1/-1">New programs launching soon. Check back!</p>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<section class="section section-alt">
+<!-- ═══ WHAT YOU'LL LEARN ═══ -->
+<section class="tr-section section-alt" style="background:#F4F6F2">
   <div class="container">
     <div class="section-head text-center">
       <div class="eyebrow">Curriculum</div>
       <h2>What You'll Learn</h2>
+      <p class="text-muted" style="max-width:600px;margin:.5rem auto 0">Hands-on skills across the electronics repair spectrum.</p>
     </div>
-    <div class="row">
-      <div class="col-md-4"><div class="mn-card" style="padding:1.5rem">
-        <h5>📱 Mobile &amp; Tablet Repair</h5>
-        <p class="text-muted" style="font-size:.9rem">Screen replacement, battery, charging ports, software diagnostics.</p>
-      </div></div>
-      <div class="col-md-4"><div class="mn-card" style="padding:1.5rem">
-        <h5>💻 Laptop &amp; Desktop</h5>
-        <p class="text-muted" style="font-size:.9rem">Motherboard diagnosis, RAM, storage, OS recovery, upgrades.</p>
-      </div></div>
-      <div class="col-md-4"><div class="mn-card" style="padding:1.5rem">
-        <h5>🔧 Soldering &amp; Components</h5>
-        <p class="text-muted" style="font-size:.9rem">Through-hole, SMD, component testing, board-level repair.</p>
-      </div></div>
+
+    <div class="includes-grid">
+      <div class="include-chip"><div class="ic">🔧</div><span>Electronics Fundamentals</span></div>
+      <div class="include-chip"><div class="ic">📱</div><span>Mobile Phone Repair</span></div>
+      <div class="include-chip"><div class="ic">💻</div><span>Laptop &amp; Desktop Repair</span></div>
+      <div class="include-chip"><div class="ic">🔌</div><span>Electronic Troubleshooting</span></div>
+      <div class="include-chip"><div class="ic">📺</div><span>Flat TV Repair</span></div>
+      <div class="include-chip"><div class="ic">🧪</div><span>Components Testing</span></div>
+      <div class="include-chip"><div class="ic">🔥</div><span>Soldering &amp; Desoldering</span></div>
+      <div class="include-chip"><div class="ic">🔬</div><span>Board Level Repair</span></div>
+      <div class="include-chip"><div class="ic">🛠️</div><span>Tools &amp; Equipment Handling</span></div>
+      <div class="include-chip"><div class="ic">💼</div><span>Business &amp; Entrepreneurship</span></div>
     </div>
+  </div>
+</section>
+
+<!-- ═══ WHO CAN APPLY ═══ -->
+<section class="tr-section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem">
+      <div>
+        <div class="eyebrow">Eligibility</div>
+        <h2 style="font-family:'Bebas Neue';font-size:1.8rem">Who Can Apply?</h2>
+        <p style="color:#555">Underprivileged youth (18–35 years) with passion and commitment to learn and succeed.</p>
+        <ul style="list-style:none;padding:0;margin-top:1rem">
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Gain marketable, practical skills</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Start your own repair business</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Earn an income and support your family</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Serve your community with valuable skills</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Be part of a brighter Sierra Leone</li>
+        </ul>
+      </div>
+      <div>
+        <div class="eyebrow">Graduates Receive</div>
+        <h2 style="font-family:'Bebas Neue';font-size:1.8rem">Upon Completion</h2>
+        <p style="color:#555">A full toolkit for launching your career.</p>
+        <ul style="list-style:none;padding:0;margin-top:1rem">
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Certificate of Completion</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Entrepreneurship Guidance</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Career Support</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Starter Kit (for outstanding trainees)</li>
+          <li style="padding:.5rem 0;display:flex;gap:.6rem"><span style="color:#8DC63F;font-weight:bold">✓</span> Ongoing mentorship</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="container">
+  <div class="tr-cta">
+    <h2>Ready to Start?</h2>
+    <p>Apply today for our next cohort. Limited seats available.</p>
+    <a href="{{ url_for('training.apply') }}" class="btn-mn-primary" style="background:#fff;color:#6FA82E;font-size:1rem;padding:.9rem 2rem">Apply Now</a>
+    <a href="{{ url_for('main.contact') }}" class="btn-mn-outline" style="border-color:#fff;color:#fff;font-size:1rem;padding:.9rem 2rem;margin-left:.5rem">Ask Questions</a>
   </div>
 </section>
 

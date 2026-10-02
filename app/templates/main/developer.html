@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block title %}About This App — {{ brand_name }}{% endblock %}
+{% block description %}About the Maxim Nyansa Electronics web platform — built by Michael Jobie Musa.{% endblock %}
+
+{% block head %}
+<style>
+.dev-hero{
+  background:linear-gradient(135deg,#1A1A1A,#2d3a1f);color:#fff;
+  padding:5rem 0 4rem;position:relative;overflow:hidden;
+}
+.dev-hero::before{
+  content:"";position:absolute;top:-100px;right:-100px;width:400px;height:400px;
+  border-radius:50%;background:radial-gradient(circle,rgba(141,198,63,.25),transparent 70%);
+}
+.dev-hero h1{color:#fff;font-size:clamp(2rem,5vw,3.4rem);margin:0 0 1rem}
+.dev-hero p{color:#cfd9c7;max-width:640px;font-size:1.05rem}
+
+.author-card{
+  background:#fff;border-radius:20px;padding:2.5rem;
+  box-shadow:0 12px 40px rgba(0,0,0,.08);
+  display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:center;
+  border-top:5px solid #8DC63F;margin-bottom:3rem;
+}
+@media (max-width:700px){.author-card{grid-template-columns:1fr;text-align:center}}
+.author-avatar{
+  width:120px;height:120px;border-radius:50%;
+  background:linear-gradient(135deg,#8DC63F,#6FA82E);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue';font-size:2.8rem;
+}
+.author-card h2{font-family:'Bebas Neue';font-size:2rem;margin:0 0 .3rem}
+.author-card .role{color:#6FA82E;font-family:'Oswald';font-size:.85rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.8rem}
+.author-card p{color:#555;margin:.4rem 0;line-height:1.6}
+
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}
+.feature-card{
+  background:#fff;padding:1.6rem;border-radius:14px;
+  box-shadow:0 6px 20px rgba(0,0,0,.05);border-top:3px solid #8DC63F;
+}
+.feature-card h5{font-family:'Bebas Neue';font-size:1.15rem;margin:0 0 .5rem;color:#1A1A1A}
+.feature-card p{color:#666;font-size:.88rem;margin:0;line-height:1.55}
+.feature-card .icon{font-size:1.6rem;margin-bottom:.6rem;display:block}
+
+.guide-step{
+  display:grid;grid-template-columns:auto 1fr;gap:1.2rem;
+  padding:1.2rem;border-radius:12px;background:#fff;
+  box-shadow:0 4px 16px rgba(0,0,0,.04);margin-bottom:.8rem;align-items:flex-start;
+}
+.guide-step .step-num{
+  width:38px;height:38px;border-radius:50%;background:#8DC63F;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue';font-size:1.2rem;flex-shrink:0;
+}
+.guide-step h5{margin:0 0 .3rem;font-family:'Oswald';font-size:.95rem;color:#1A1A1A}
+.guide-step p{margin:0;color:#666;font-size:.88rem;line-height:1.55}
+
+.tech-stack{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.tech-chip{
+  background:#E8F5D0;color:#6FA82E;padding:.4rem .9rem;border-radius:999px;
+  font-family:'Oswald';font-size:.78rem;font-weight:500;letter-spacing:.5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="dev-hero">
+  <div class="container" style="position:relative;z-index:1">
+    <span class="hero-pill">About This Platform</span>
+    <h1>Built to Serve Sierra Leone's Youth</h1>
+    <p>An open, modern web platform powering Maxim Nyansa Electronics' training, shop, E-Library, and donor engagement.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+
+    <!-- ═══ AUTHOR ═══ -->
+    <div class="author-card">
+      <div class="author-avatar">MJ</div>
+      <div>
+        <h2>Michael Jobie Musa</h2>
+        <div class="role">Country Director &amp; Developer</div>
+        <p>
+          As Country Director of Maxim Nyansa Foundation Sierra Leone, Michael leads the
+          organization's mission to empower young people through technical education and
+          enterprise. He designed and developed this web platform to bring that mission online —
+          making training, shop services, E-Library resources, and donor engagement
+          accessible to everyone, everywhere.
+        </p>
+        <p style="margin-top:1rem">
+          <a href="mailto:michaeljobi@maximnyansa.com" class="btn-mn-outline btn-sm">Contact Michael</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══ FEATURES ═══ -->
+    <div class="section-head text-center">
+      <div class="eyebrow">Full Feature Set</div>
+      <h2>What This App Does</h2>
+    </div>
+
+    <div class="feature-grid" style="margin-bottom:3rem">
+      <div class="feature-card">
+        <span class="icon">🎓</span>
+        <h5>Training Portal</h5>
+        <p>Browse programs, apply online, track application status, view curriculum.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🛒</span>
+        <h5>Electronics Shop</h5>
+        <p>Browse new &amp; refurbished electronics, add to cart, checkout securely.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📚</span>
+        <h5>E-Library</h5>
+        <p>Learning resources, manuals, guides — accessible anytime, for free.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🎥</span>
+        <h5>Video Stories</h5>
+        <p>Real voices from our trainees — their journeys, skills, and dreams.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">💚</span>
+        <h5>Donor Portal</h5>
+        <p>Pledge donations, view live impact metrics, follow project milestones.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">⚙️</span>
+        <h5>Admin CMS</h5>
+        <p>Full control over programs, products, applications, orders, and content.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📜</span>
+        <h5>Certificates</h5>
+        <p>Generate branded PDF certificates for graduates with one click.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📧</span>
+        <h5>Bulk Email</h5>
+        <p>Reach all applicants or specific cohorts with targeted messages.</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔒</span>
+        <h5>Security First</h5>
+        <p>CSRF protection, rate limiting, secure cookies, encrypted passwords.</p>
+      </div>
+    </div>
+
+    <!-- ═══ USER GUIDE ═══ -->
+    <div class="section-head text-center" style="margin-top:4rem">
+      <div class="eyebrow">User Guide</div>
+      <h2>How to Use the Platform</h2>
+    </div>
+
+    <div style="max-width:820px;margin:0 auto">
+
+      <h3 style="font-family:'Bebas Neue';font-size:1.5rem;margin:2rem 0 .8rem">For Applicants</h3>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div>
+          <h5>Create an account</h5>
+          <p>Click <strong>Apply Now</strong> at the top-right and register with your email and phone.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div>
+          <h5>Browse and select a program</h5>
+          <p>Visit the <strong>Training</strong> page, review the program details, and choose the one that fits you.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div>
+          <h5>Submit your application</h5>
+          <p>Click <strong>Apply Now</strong> on the program card, fill out the form, and submit.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div>
+          <h5>Track your status</h5>
+          <p>Check <strong>My Applications</strong> in your profile to see if you're pending, approved, or enrolled.</p>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Bebas Neue';font-size:1.5rem;margin:2rem 0 .8rem">For Donors</h3>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div>
+          <h5>See the impact</h5>
+          <p>Visit the <strong>Impact</strong> page to see live metrics — trainees, programs, and community reach.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div>
+          <h5>Pledge a donation</h5>
+          <p>On the <strong>Donors</strong> page, fill in the pledge form with your amount and message.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div>
+          <h5>Complete payment</h5>
+          <p>You'll receive a Pay Now link — pay via card, mobile money, or bank transfer.</p>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Bebas Neue';font-size:1.5rem;margin:2rem 0 .8rem">For Shoppers</h3>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div>
+          <h5>Browse the shop</h5>
+          <p>Filter by category, condition (new/refurbished/used), or search by name.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div>
+          <h5>Add to cart and checkout</h5>
+          <p>Click <strong>Add</strong> on any product, then proceed to checkout with your delivery details.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div>
+          <h5>Pay and receive</h5>
+          <p>Pay online via Paystack or arrange payment on delivery. We'll contact you to confirm.</p>
+        </div>
+      </div>
+
+      <h3 style="font-family:'Bebas Neue';font-size:1.5rem;margin:2rem 0 .8rem">For Administrators</h3>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div>
+          <h5>Log in to /admin</h5>
+          <p>Use your admin credentials to access the dashboard, KPIs, and charts.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div>
+          <h5>Manage applications</h5>
+          <p>Review, approve, reject, or enroll applicants. Download certificates for enrolled trainees.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div>
+          <h5>Update content</h5>
+          <p>Add programs, products, news posts, videos, and E-Library resources — all without coding.</p>
+        </div>
+      </div>
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div>
+          <h5>Adjust site settings</h5>
+          <p>Update brand name, contact info, social links, and impact metrics from <strong>Settings</strong>.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">5</div>
+        <div>
+          <h5>Send bulk emails</h5>
+          <p>Target specific programs or statuses and send personalized messages to applicants.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ TECH ═══ -->
+    <div style="text-align:center;margin-top:4rem;padding:2rem;background:#F4F6F2;border-radius:16px">
+      <h3 style="font-family:'Bebas Neue';font-size:1.6rem;margin:0 0 1rem">Built With</h3>
+      <div class="tech-stack" style="justify-content:center">
+        <span class="tech-chip">Flask</span>
+        <span class="tech-chip">PostgreSQL</span>
+        <span class="tech-chip">SQLAlchemy</span>
+        <span class="tech-chip">Jinja2</span>
+        <span class="tech-chip">Bootstrap 5</span>
+        <span class="tech-chip">Chart.js</span>
+        <span class="tech-chip">Paystack</span>
+        <span class="tech-chip">Cloudinary</span>
+      </div>
+      <p style="color:#888;margin-top:1.5rem;font-size:.85rem">
+        Version 1.0.0 · Released {{ current_year }} · Continuously maintained
+      </p>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
