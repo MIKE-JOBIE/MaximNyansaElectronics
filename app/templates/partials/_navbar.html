@@ -21,22 +21,52 @@
 
     <div id="nav" class="mn-nav-links">
 
-      {# ── All 10 public navigation links ── #}
-      <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
-      <a class="nav-link" href="{{ url_for('main.about') }}">About</a>
-      <a class="nav-link" href="{{ url_for('main.impact') }}">Impact</a>
-      <a class="nav-link" href="{{ url_for('main.news') }}">News</a>
-      <a class="nav-link" href="{{ url_for('training.index') }}">Training</a>
-      <a class="nav-link" href="{{ url_for('training.online_venue') }}">Online Venue</a>
-      <a class="nav-link" href="{{ url_for('shop.index') }}">Shop</a>
-      <a class="nav-link" href="{{ url_for('library.index') }}">E-Library</a>
-      <a class="nav-link" href="{{ url_for('library.videos') }}">Videos</a>
-      <a class="nav-link" href="{{ url_for('donors.index') }}">Donors</a>
-      <a class="nav-link" href="{{ url_for('main.contact') }}">Contact</a>
+      {# ── All 11 public navigation links with ACTIVE state ── #}
+      <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
+         href="{{ url_for('main.index') }}">Home</a>
+
+      <a class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}"
+         href="{{ url_for('main.about') }}">About</a>
+
+      <a class="nav-link {% if request.endpoint == 'main.impact' %}active{% endif %}"
+         href="{{ url_for('main.impact') }}">Impact</a>
+
+      <a class="nav-link {% if request.endpoint == 'main.news' %}active{% endif %}"
+         href="{{ url_for('main.news') }}">News</a>
+
+      <a class="nav-link {% if request.endpoint and request.endpoint.startswith('training.') and request.endpoint != 'training.online_venue' %}active{% endif %}"
+         href="{{ url_for('training.index') }}">Training</a>
+
+      <a class="nav-link {% if request.endpoint == 'training.online_venue' %}active{% endif %}"
+         href="{{ url_for('training.online_venue') }}">Online Venue</a>
+
+      <a class="nav-link {% if request.endpoint and request.endpoint.startswith('shop.') %}active{% endif %}"
+         href="{{ url_for('shop.index') }}">Shop</a>
+
+      <a class="nav-link {% if request.endpoint and request.endpoint.startswith('library.') and request.endpoint != 'library.videos' %}active{% endif %}"
+         href="{{ url_for('library.index') }}">E-Library</a>
+
+      <a class="nav-link {% if request.endpoint == 'library.videos' %}active{% endif %}"
+         href="{{ url_for('library.videos') }}">Videos</a>
+
+      <a class="nav-link {% if request.endpoint and request.endpoint.startswith('donors.') %}active{% endif %}"
+         href="{{ url_for('donors.index') }}">Donors</a>
+
+      <a class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}"
+         href="{{ url_for('main.contact') }}">Contact</a>
 
       {# ── Account actions ── #}
       {% if current_user.is_authenticated %}
         <span class="nav-divider" aria-hidden="true"></span>
+
+        <a class="nav-action" href="{{ url_for('shop.cart_view') }}" title="View cart">
+         🛒 Cart
+         {% if cart_count > 0 %}
+           <span style="background:#F5A623;color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.65rem;margin-left:.3rem">
+             {{ cart_count }}
+           </span>
+         {% endif %}
+       </a>
 
         <a class="nav-action" href="{{ url_for('auth.profile') }}">
           {{ current_user.first_name or 'Account' }}

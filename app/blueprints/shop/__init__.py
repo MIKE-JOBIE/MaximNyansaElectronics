@@ -9,6 +9,11 @@ shop_bp = Blueprint("shop", __name__, template_folder="../../templates/shop")
 
 def _cart(): return session.setdefault("cart", {})
 
+def cart_count():
+    """Return the total number of items in the session cart."""
+    cart = session.get("cart", {})
+    return sum(cart.values())
+
 @shop_bp.route("/")
 def index():
     page = request.args.get("page", 1, type=int)
@@ -59,8 +64,12 @@ def add_to_cart(pid):
     cart = _cart()
     cart[str(pid)] = cart.get(str(pid), 0) + 1
     session.modified = True
-    flash(f"Added {p.name} to cart.", "success")
-    return redirect(request.referrer or url_for("shop.index"))
+    flash(f"✅ {p.name} added to cart", "success")
+
+    # If the request came from a product detail page, go to cart
+    # If the request came from the shop listing, stay on shop
+    # In both cases, we go to the cart for clear feedback
+    return redirect(url_for("shop.cart_view"))
 
 @shop_bp.route("/cart")
 def cart_view():
@@ -116,11 +125,11 @@ def checkout():
         return redirect(url_for("shop.order_success", ref=order.reference))
     return render_template("shop/checkout.html", form=form, items=items, total=total)
 
-# @shop_bp.route("/order/<ref>")
-# @login_required
-# def order_success(ref):
-#     o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
-#     return render_template("shop/order_success.html", order=o)
+@shop_bp.route("/order/<ref>")
+@login_required
+def order_success(ref):
+    o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
+    return render_template("shop/order_success.html", order=o)
 
 @shop_bp.route("/orders")
 @login_required
@@ -143,25 +152,44 @@ from flask import current_app
 @shop_bp.route("/pay/<ref>")
 @login_required
 def pay(ref):
+    """Start a Paystack payment for an order."""
     o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
-    if not paystack_ready():
-        flash("Online payments not yet enabled. We'll contact you to arrange payment.", "info")
+
+    # If already paid, don't re-charge
+    if o.payment_status == "paid":
+        flash("This order is already paid.", "info")
         return redirect(url_for("shop.order_detail", ref=o.reference))
+
+    # If Paystack isn't configured, show manual instructions
+    if not paystack_ready():
+        return render_template("shop/pay_manual.html", order=o)
+
     callback = url_for("shop.pay_callback", ref=o.reference, _external=True)
-    # Paystack expects amount in kobo (for NGN) or smallest unit. For SLE, use units.
+    # Paystack expects amount in smallest unit. For SLE/NGN, use *100.
     amount_minor = int(float(o.total) * 100)
+
     data = initialize_transaction(
         email=current_user.email,
         amount_minor=amount_minor,
         reference=o.reference,
         callback_url=callback,
-        metadata={"type": "order", "order_id": o.id, "user_id": current_user.id},
+        metadata={
+            "type": "order",
+            "order_id": o.id,
+            "user_id": current_user.id,
+            "custom_fields": [
+                {"display_name": "Order Reference", "variable_name": "order_ref", "value": o.reference},
+            ],
+        },
     )
     if not data:
-        flash("Could not start payment. Try again or contact us.", "danger")
+        flash("Could not start payment. Please try again or contact us.", "danger")
         return redirect(url_for("shop.order_detail", ref=o.reference))
+
     o.payment_ref = o.reference
+    o.payment_status = "initiated"
     db.session.commit()
+
     return redirect(data["authorization_url"])
 
 

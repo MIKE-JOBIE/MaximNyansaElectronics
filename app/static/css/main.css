@@ -21,12 +21,15 @@ a:hover{color:var(--brand-green)}
 
 /* ─────────── 2. NAVBAR ─────────── */
 .mn-navbar{
-  background:#fff;
+  background:rgba(255,255,255,.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow:var(--shadow);
   padding:.6rem 0;
   position:sticky;
   top:0;
   z-index:1030;
+  transition: box-shadow .2s;
 }
 
 .mn-navbar .mn-navbar-inner{
@@ -336,8 +339,28 @@ a:hover{color:var(--brand-green)}
 
 /* ─────────── 11. FLASH MESSAGES ─────────── */
 .flash-wrap{
-  position:fixed;top:80px;right:20px;z-index:1080;
-  max-width:360px;display:flex;flex-direction:column;gap:.5rem;
+  position:fixed;
+  top:80px;
+  right:20px;
+  z-index:9999;
+  max-width:360px;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+  pointer-events:none;
+}
+.flash-wrap .flash{
+  pointer-events:auto;
+  animation: flashIn .35s ease-out;
+}
+@keyframes flashIn {
+  from { opacity:0; transform: translateX(30px); }
+  to   { opacity:1; transform: translateX(0); }
+}
+@media (max-width:600px){
+  .flash-wrap{
+    top:60px; right:10px; left:10px; max-width:none;
+  }
 }
 .flash{
   padding:.8rem 1.1rem;border-radius:var(--radius);
@@ -526,6 +549,129 @@ a:hover{color:var(--brand-green)}
 /* ─────────── 23. ADMIN PAGE TWEAKS ─────────── */
 body:has(.admin-page) .mn-navbar{
   position:static;box-shadow:none;border-bottom:1px solid #eee;
+}
+
+/* =========================================================
+   MOBILE RESPONSIVENESS — universal fixes
+   ========================================================= */
+
+/* Prevent horizontal scroll everywhere */
+html, body {
+  overflow-x: clip;      /* `clip` prevents horizontal scroll WITHOUT breaking sticky */
+  max-width: 100%;
+}
+
+/* Every image respects container */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Tables scroll horizontally on small screens */
+@media (max-width: 768px) {
+  .mn-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .mn-table thead,
+  .mn-table tbody { display: table; width: 100%; }
+
+  /* Cards stack */
+  .row { flex-direction: column; margin: 0; }
+  .row > [class*="col-"] {
+    width: 100% !important;
+    flex: 1 1 100%;
+    padding: .5rem 0;
+  }
+
+  /* Hero fits */
+  .mn-hero {
+    min-height: 60vh;
+    padding: 2rem 0;
+  }
+  .mn-hero h1 { font-size: 2rem; }
+  .mn-hero p.lead { font-size: 1rem; }
+
+  /* Admin layout stacks */
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .admin-side {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    padding: .6rem;
+  }
+  .admin-side h6 { flex-basis: 100%; margin: .5rem 0 .2rem; }
+  .admin-side a { flex: 1 1 auto; font-size: .85rem; padding: .5rem .7rem; }
+
+  /* Topbar tweaks */
+  .admin-topbar {
+    flex-direction: column;
+    gap: .5rem;
+    align-items: stretch;
+  }
+
+  /* Container padding */
+  .container { padding: 0 .9rem; }
+
+  /* Section padding */
+  .section { padding: 2rem 0; }
+
+  /* Footer */
+  .footer-grid { grid-template-columns: 1fr !important; }
+
+  /* Vmv/objectives grids stack naturally */
+  .vmv-grid,
+  .objectives,
+  .structure-grid,
+  .team-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons full width in forms */
+  .mn-form button[type="submit"] { width: 100%; }
+
+  /* Floating WhatsApp doesn't overlap content */
+  .wa-float { bottom: 14px; left: 14px; width: 44px; height: 44px; }
+  .mn-admin-switch {
+    bottom: 14px;
+    right: 14px;
+    padding: .6rem .9rem;
+    font-size: .72rem;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+  .mn-hero h1 { font-size: 1.6rem; }
+  .counter-num { font-size: 2rem; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.3rem !important; }
+}
+
+/* Active navbar link */
+.mn-navbar .nav-link.active {
+  color: var(--brand-green-dark) !important;
+  font-weight: 600;
+  position: relative;
+}
+.mn-navbar .nav-link.active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 2px;
+  height: 2px;
+  background: var(--brand-green);
+  border-radius: 2px;
+}
+
+/* Active admin sidebar link */
+.admin-side a.active {
+  background: #8DC63F !important;
+  color: #fff !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
