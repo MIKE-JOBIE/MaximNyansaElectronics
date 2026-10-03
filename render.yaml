@@ -42,3 +42,7 @@ services:
         sync: false
       - key: PAYSTACK_PUBLIC_KEY
         sync: false
+      - key: PAYSTACK_TEST_MODE
+        value: "true"
+      - key: SITE_URL
+        value: "https://maxim-nyansa-electronics.onrender.com"
