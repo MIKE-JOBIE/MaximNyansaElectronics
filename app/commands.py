@@ -12,8 +12,17 @@ def register_commands(app):
     def seed():
         """Create admin, sample programs, categories, products."""
         from flask import current_app
+
         admin_email = current_app.config["ADMIN_EMAIL"]
         admin_pass = current_app.config["ADMIN_PASSWORD"]
+
+        # ─── SITE SETTINGS ──────────────────────────────────
+        try:
+            from .settings_utils import seed_default_settings
+            seed_default_settings()
+            click.echo("✔ Site settings seeded")
+        except Exception as e:
+            click.echo(f"⚠ Settings seed skipped: {e}")
 
         # ─── ADMIN USER ─────────────────────────────────────
         if not User.query.filter_by(email=admin_email).first():
@@ -32,25 +41,25 @@ def register_commands(app):
                 summary="Hands-on training in electronics repair, replacement & maintenance. 90% practical, 3 months, up to 20 seats.",
                 description=(
                     "A practical, hands-on training designed for underprivileged youth "
-                    "(18–35 years) who are passionate about changing their situation, "
+                    "(18-35 years) who are passionate about changing their situation, "
                     "acquiring new skills, becoming entrepreneurs, and serving their communities.\n\n"
                     "TRAINING INCLUDES:\n"
-                    "• Electronics Fundamentals\n"
-                    "• Components Testing\n"
-                    "• Soldering & Desoldering\n"
-                    "• Board Level Repair\n"
-                    "• Tools & Equipment Handling\n"
-                    "• Business & Entrepreneurship\n\n"
+                    "- Electronics Fundamentals\n"
+                    "- Components Testing\n"
+                    "- Soldering & Desoldering\n"
+                    "- Board Level Repair\n"
+                    "- Tools & Equipment Handling\n"
+                    "- Business & Entrepreneurship\n\n"
                     "GRADUATES RECEIVE:\n"
-                    "• Certificate of Completion\n"
-                    "• Entrepreneurship Guidance\n"
-                    "• Career Support\n"
-                    "• Starter Kit (for outstanding trainees)\n\n"
+                    "- Certificate of Completion\n"
+                    "- Entrepreneurship Guidance\n"
+                    "- Career Support\n"
+                    "- Starter Kit (for outstanding trainees)\n\n"
                     "CURRICULUM:\n"
-                    "• Laptop & Desktop Repair\n"
-                    "• Mobile Phone Repair\n"
-                    "• Electronic Troubleshooting\n"
-                    "• Flat TV Repair"
+                    "- Laptop & Desktop Repair\n"
+                    "- Mobile Phone Repair\n"
+                    "- Electronic Troubleshooting\n"
+                    "- Flat TV Repair"
                 ),
                 start_date=date.today() + timedelta(days=30),
                 end_date=date.today() + timedelta(days=120),
@@ -58,36 +67,35 @@ def register_commands(app):
                 fee=0,
                 status="open",
             )
-
             p2 = Program(
-                title="NGO Staff & Volunteers — One Week Practical ICT Training",
+                title="NGO Staff & Volunteers - One Week Practical ICT Training",
                 slug=slugify("NGO Staff Volunteers One Week Practical ICT Training"),
                 summary="Stop struggling with everyday digital tasks. One-week hands-on ICT boot camp for NGO staff, volunteers, and field officers.",
                 description=(
                     "One-week practical ICT training designed for NGO staff, volunteers, "
                     "field officers, program coordinators, and project teams working with digital tools.\n\n"
                     "PRACTICAL SKILLS YOU WILL LEARN:\n"
-                    "• Microsoft Word — Reports & Letters\n"
-                    "• Microsoft Excel — Data & Basic Formulas\n"
-                    "• PowerPoint — Presentations that Inspire\n"
-                    "• Email & Internet — Effective Communication\n"
-                    "• Google Workspace — Docs, Sheets, Drive\n"
-                    "• Data Management & File Organization\n"
-                    "• Online Safety & Digital Best Practices\n"
-                    "• Using AI Tools to Work Smarter\n\n"
+                    "- Microsoft Word - Reports & Letters\n"
+                    "- Microsoft Excel - Data & Basic Formulas\n"
+                    "- PowerPoint - Presentations that Inspire\n"
+                    "- Email & Internet - Effective Communication\n"
+                    "- Google Workspace - Docs, Sheets, Drive\n"
+                    "- Data Management & File Organization\n"
+                    "- Online Safety & Digital Best Practices\n"
+                    "- Using AI Tools to Work Smarter\n\n"
                     "BONUS MODULES:\n"
-                    "• Using WhatsApp Business for Communication\n"
-                    "• Cloud Storage & Collaboration\n"
-                    "• Digital Tools for Project Management\n"
-                    "• Creating Forms & Surveys (Google Forms)\n"
-                    "• Document Templates & Automation Tips\n\n"
+                    "- Using WhatsApp Business for Communication\n"
+                    "- Cloud Storage & Collaboration\n"
+                    "- Digital Tools for Project Management\n"
+                    "- Creating Forms & Surveys (Google Forms)\n"
+                    "- Document Templates & Automation Tips\n\n"
                     "DURATION: One Week (5 Training Days)\n"
                     "FORMAT: Hands-on practical sessions, interactive, small class size\n\n"
                     "YOU WILL RECEIVE:\n"
-                    "• Certificate of Participation\n"
-                    "• Resources\n"
-                    "• Ongoing Support\n\n"
-                    "TIME: 9:00 AM – 4:00 PM\n"
+                    "- Certificate of Participation\n"
+                    "- Resources\n"
+                    "- Ongoing Support\n\n"
+                    "TIME: 9:00 AM - 4:00 PM\n"
                     "LOCATION: 5C BaiBureh Road, Ferry Junction, Freetown"
                 ),
                 start_date=date.today() + timedelta(days=45),
@@ -96,7 +104,6 @@ def register_commands(app):
                 fee=400,
                 status="open",
             )
-
             db.session.add_all([p1, p2])
             click.echo("✔ Programs seeded")
         else:
@@ -112,37 +119,39 @@ def register_commands(app):
         # ─── PRODUCTS ───────────────────────────────────────
         if Product.query.count() == 0:
             cat = Category.query.first()
-            samples = [
-                ("Refurbished HP Laptop", "HP EliteBook 840 G5, 8GB RAM, 256GB SSD — professionally refurbished.", 2500, "refurbished"),
-                ("Digital Multimeter", "Reliable multimeter for diagnostics and testing.", 180, "new"),
-                ("Soldering Kit Pro", "60W adjustable soldering station with accessories.", 420, "new"),
-                ("Refurbished iPhone X", "64GB, fully tested, 90-day warranty.", 1900, "refurbished"),
-            ]
-            for name, desc, price, cond in samples:
-                db.session.add(Product(
-                    name=name,
-                    slug=slugify(name),
-                    description=desc,
-                    price=price,
-                    stock=10,
-                    condition=cond,
-                    category_id=cat.id,
-                    is_active=True,
-                ))
-            click.echo("✔ Sample products seeded")
+            if cat:
+                samples = [
+                    ("Refurbished HP Laptop", "HP EliteBook 840 G5, 8GB RAM, 256GB SSD - professionally refurbished.", 2500, "refurbished"),
+                    ("Digital Multimeter", "Reliable multimeter for diagnostics and testing.", 180, "new"),
+                    ("Soldering Kit Pro", "60W adjustable soldering station with accessories.", 420, "new"),
+                    ("Refurbished iPhone X", "64GB, fully tested, 90-day warranty.", 1900, "refurbished"),
+                ]
+                for name, desc, price, cond in samples:
+                    db.session.add(Product(
+                        name=name,
+                        slug=slugify(name),
+                        description=desc,
+                        price=price,
+                        stock=10,
+                        condition=cond,
+                        category_id=cat.id,
+                        is_active=True,
+                    ))
+                click.echo("✔ Sample products seeded")
 
         # ─── E-LIBRARY ──────────────────────────────────────
         if Resource.query.count() == 0:
-            for t, c in [
+            resources = [
                 ("Electronics Fundamentals Handbook", "Handbook"),
                 ("Soldering Best Practices", "Guide"),
                 ("Board-Level Repair Manual", "Manual"),
                 ("Starting Your Repair Business", "Entrepreneurship"),
-            ]:
+            ]
+            for t, c in resources:
                 db.session.add(Resource(
                     title=t,
                     slug=slugify(t),
-                    description=f"Reference material — {t}",
+                    description=f"Reference material - {t}",
                     category=c,
                     file_url="#",
                 ))
