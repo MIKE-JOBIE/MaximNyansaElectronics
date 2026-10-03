@@ -6,7 +6,18 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-me")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///dev.db")
+    # Normalize common Postgres URL formats to use the psycopg2 driver
+    # (SQLAlchemy 2.x defaults to psycopg v3, but we have psycopg2-binary installed)
+    _raw_db_url = os.getenv("DATABASE_URL", "sqlite:///dev.db")
+
+    if _raw_db_url.startswith("postgres://"):
+        # Heroku / Render legacy format
+        _raw_db_url = _raw_db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif _raw_db_url.startswith("postgresql://") and "+psycopg" not in _raw_db_url:
+        # Standard Postgres URL — force psycopg2 driver
+        _raw_db_url = _raw_db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+    SQLALCHEMY_DATABASE_URI = _raw_db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "app", "static", "uploads")
     MAX_CONTENT_LENGTH = 8 * 1024 * 1024
