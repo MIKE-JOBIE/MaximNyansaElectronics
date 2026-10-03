@@ -1,0 +1,294 @@
+{
+  "_meta": {
+    "exported_at": "2026-10-03T10:58:18.372496",
+    "version": "1.0"
+  },
+  "categories": [
+    {
+      "name": "Laptops",
+      "slug": "laptops"
+    },
+    {
+      "name": "Phones",
+      "slug": "phones"
+    },
+    {
+      "name": "Accessories",
+      "slug": "accessories"
+    },
+    {
+      "name": "Tools",
+      "slug": "tools"
+    }
+  ],
+  "programs": [
+    {
+      "title": "3-Month Electronics Repair, Replacement & Maintenance Boot Camp",
+      "slug": "3-month-electronics-repair-replacement-maintenance-boot-camp",
+      "summary": "Hands-on training in electronics repair, replacement & maintenance. 90% practical, 3 months, up to 20 seats.",
+      "description": "A practical, hands-on training designed for underprivileged youth (18–35 years) who are passionate about changing their situation, acquiring new skills, becoming entrepreneurs, and serving their communities.\n\nTRAINING INCLUDES:\n• Electronics Fundamentals\n• Components Testing\n• Soldering & Desoldering\n• Board Level Repair\n• Tools & Equipment Handling\n• Business & Entrepreneurship\n\nGRADUATES RECEIVE:\n• Certificate of Completion\n• Entrepreneurship Guidance\n• Career Support\n• Starter Kit (for outstanding trainees)\n\nCURRICULUM:\n• Laptop & Desktop Repair\n• Mobile Phone Repair\n• Electronic Troubleshooting\n• Flat TV Repair",
+      "start_date": "2026-11-01",
+      "end_date": "2027-01-30",
+      "capacity": 20,
+      "fee": 0.0,
+      "status": "open",
+      "cover_image": null,
+      "created_at": "2026-10-02T07:39:58.659750"
+    },
+    {
+      "title": "NGO Staff & Volunteers — One Week Practical ICT Training",
+      "slug": "ngo-staff-volunteers-one-week-practical-ict-training",
+      "summary": "Stop struggling with everyday digital tasks. One-week hands-on ICT boot camp for NGO staff, volunteers, and field officers.",
+      "description": "One-week practical ICT training designed for NGO staff, volunteers, field officers, program coordinators, and project teams working with digital tools.\n\nPRACTICAL SKILLS YOU WILL LEARN:\n• Microsoft Word — Reports & Letters\n• Microsoft Excel — Data & Basic Formulas\n• PowerPoint — Presentations that Inspire\n• Email & Internet — Effective Communication\n• Google Workspace — Docs, Sheets, Drive\n• Data Management & File Organization\n• Online Safety & Digital Best Practices\n• Using AI Tools to Work Smarter\n\nBONUS MODULES:\n• Using WhatsApp Business for Communication\n• Cloud Storage & Collaboration\n• Digital Tools for Project Management\n• Creating Forms & Surveys (Google Forms)\n• Document Templates & Automation Tips\n\nDURATION: One Week (5 Training Days)\nFORMAT: Hands-on practical sessions, interactive, small class size\n\nYOU WILL RECEIVE:\n• Certificate of Participation\n• Resources\n• Ongoing Support\n\nTIME: 9:00 AM – 4:00 PM\nLOCATION: 5C BaiBureh Road, Ferry Junction, Freetown",
+      "start_date": "2026-11-16",
+      "end_date": "2026-11-23",
+      "capacity": 15,
+      "fee": 400.0,
+      "status": "open",
+      "cover_image": null,
+      "created_at": "2026-10-02T07:39:58.659750"
+    }
+  ],
+  "products": [
+    {
+      "name": "Refurbished HP Laptop",
+      "slug": "refurbished-hp-laptop",
+      "description": "HP EliteBook 840 G5, 8GB RAM, 256GB SSD — professionally refurbished.",
+      "price": 2500.0,
+      "stock": 10,
+      "condition": "refurbished",
+      "image": "uploads/prod_6e14b296a00d_hp-laptop.jpg",
+      "is_active": true,
+      "created_at": "2026-09-29T09:17:49.407598"
+    },
+    {
+      "name": "Digital Multimeter",
+      "slug": "digital-multimeter",
+      "description": "Reliable multimeter for diagnostics and testing.",
+      "price": 180.0,
+      "stock": 10,
+      "condition": "new",
+      "image": "uploads/prod_cd6479c255ff_product-multimeter.jpg",
+      "is_active": true,
+      "created_at": "2026-09-29T09:17:49.407598"
+    },
+    {
+      "name": "Soldering Kit Pro",
+      "slug": "soldering-kit-pro",
+      "description": "60W adjustable soldering station with accessories.",
+      "price": 420.0,
+      "stock": 10,
+      "condition": "new",
+      "image": "uploads/prod_fc2219125c87_product-soldering-kit.jpg",
+      "is_active": true,
+      "created_at": "2026-09-29T09:17:49.407598"
+    },
+    {
+      "name": "Refurbished iPhone X",
+      "slug": "refurbished-iphone-x",
+      "description": "64GB, fully tested, 90-day warranty.",
+      "price": 1900.0,
+      "stock": 10,
+      "condition": "refurbished",
+      "image": "uploads/prod_da4088d67b71_iphoneX.jpg",
+      "is_active": true,
+      "created_at": "2026-09-29T09:17:49.407598"
+    },
+    {
+      "name": "Refurbished Dell Latitude E7470",
+      "slug": "refurbished-dell-latitude-e7470",
+      "description": "Refurbished Dell Latitude E7470",
+      "price": 2400.0,
+      "stock": 100,
+      "condition": "refurbished",
+      "image": "uploads/prod_9e6faa002147_product-toolkit.jpg",
+      "is_active": true,
+      "created_at": "2026-10-01T15:23:01.279148"
+    }
+  ],
+  "resources": [
+    {
+      "title": "Electronics Fundamentals Handbook",
+      "slug": "electronics-fundamentals-handbook",
+      "description": "Reference material — Electronics Fundamentals Handbook",
+      "file_url": "#",
+      "category": "Handbook",
+      "created_at": "2026-09-29T09:17:49.440071"
+    },
+    {
+      "title": "Soldering Best Practices",
+      "slug": "soldering-best-practices",
+      "description": "Reference material — Soldering Best Practices",
+      "file_url": "#",
+      "category": "Guide",
+      "created_at": "2026-09-29T09:17:49.440071"
+    },
+    {
+      "title": "Board-Level Repair Manual",
+      "slug": "board-level-repair-manual",
+      "description": "Reference material — Board-Level Repair Manual",
+      "file_url": "#",
+      "category": "Manual",
+      "created_at": "2026-09-29T09:17:49.440071"
+    },
+    {
+      "title": "Starting Your Repair Business",
+      "slug": "starting-your-repair-business",
+      "description": "Reference material — Starting Your Repair Business",
+      "file_url": "#",
+      "category": "Entrepreneurship",
+      "created_at": "2026-09-29T09:17:49.440071"
+    },
+    {
+      "title": "Electronic Bible",
+      "slug": "electronic-bible",
+      "description": "It says it all about Electronic",
+      "file_url": "/static/uploads/lib_8eb17c2e8fca_bookCover.jpg",
+      "category": "Electronics",
+      "created_at": "2026-10-01T15:04:18.840204"
+    },
+    {
+      "title": "Entrepreneurship in Electronics",
+      "slug": "entrepreneurship-in-electronics",
+      "description": "The curriculum is substantially expanded beyond the initial outline and includes the complete 14-module Entrepreneurship & Electronics Business Development course, 12-week integration plan, practical enterprise project, assessments, business-plan requirements, enterprise pitch, starter-kit launch model, six-month graduate follow-up, trainer resources, business templates, blank worksheets, rubrics, glossary and implementation checklist.",
+      "file_url": "/static/uploads/lib_1aaac8645e9d_Maxim_Nyansa_Electronics_Entrepreneurship_Course_Curriculum.pdf",
+      "category": "Entrepreneurship",
+      "created_at": "2026-10-01T16:55:07.835926"
+    },
+    {
+      "title": "NGO Workplace Digital Skills",
+      "slug": "ngo-workplace-digital-skills",
+      "description": "The curriculum is deliberately based on current Sierra Leone digital-skills priorities. In July 2026, Sierra Leone’s Ministry of Communication, Technology & Innovation highlighted productivity tools, data management/reporting, digital communication, AI/automation, cybersecurity and data protection as priority workplace skills. Current local programmes also emphasise practical, hands-on digital training. mocti.gov.sl",
+      "file_url": "/static/uploads/lib_b19c53585e3b_Complete_Instructor_Manual_NGO_Digital_Skills_Sierra_Leone.docx",
+      "category": "Digital Skills",
+      "created_at": "2026-10-01T16:57:47.355907"
+    }
+  ],
+  "posts": [
+    {
+      "title": "First cohort graduates 13 trainees",
+      "slug": "first-cohort-graduates-13-trainees",
+      "body": "Our first Vocational Training Programme in Electronic Repairs and Maintenance has successfully completed with 13 trainees. Approximately 90% of the learning was practical — participants worked directly with broken equipment from the office, developing diagnostic and repair skills through supervised hands-on activities.\r\n\r\nThe practical examination, using real broken equipment, was a defining moment. Their performance was reported as extremely good, demonstrating the value of practice-based learning.\r\n\r\n10 starter kits have already been secured for outstanding trainees. Graduates are expected to return to their communities and establish small electronics repair enterprises.",
+      "cover_image": "uploads/post_0879a1c749d3_cohort.jpg",
+      "published_at": "2026-09-29T09:17:49.448069"
+    },
+    {
+      "title": "New Training Center Opened in Freetown",
+      "slug": "new-training-center-opened-in-freetown",
+      "body": "We've relocated to a new apartment in a strategic location, providing:\r\n• Better learning environment\r\n• Increased accessibility\r\n• Additional operational space\r\n• Improved workshop capacity\r\n• Expansion opportunities for future initiatives\r\n\r\nThe new facility now serves multiple functions: training center, refurbishment workspace, administrative office, and mentorship/meeting space.",
+      "cover_image": "uploads/post_eadc72eef142_workshop.jpg",
+      "published_at": "2026-10-01T17:01:23.262743"
+    },
+    {
+      "title": "Phase Three: Electronics Shop & Refurbishment Center",
+      "slug": "phase-three-electronics-shop-refurbishment-center",
+      "body": "We're entering our next major phase — the establishment of the Electronics Shop and Refurbishment Center. The shop will sell new and slightly used electronic equipment, while the refurbishment center will diagnose, repair, and restore faulty devices.\r\n\r\nTogether, they'll create an income-generating platform supporting our team, tools, utilities, future training, and enterprise development.\r\n\r\nOur short-term ambition is to train up to 80 youths annually through multiple cycles.",
+      "cover_image": "uploads/post_ceeed9a335cd_hero.jpg",
+      "published_at": "2026-10-01T17:02:17.494226"
+    }
+  ],
+  "videos": [
+    {
+      "title": "Maxim Nyansa Training Impact ",
+      "trainee_name": "Lamin",
+      "description": "Maxim Nyansa Training Impact shared by Lamin, a past trainee",
+      "video_url": "/static/uploads/vid_479a34dbf28f_VID-20260831-WA0098.mp4",
+      "thumbnail": null,
+      "featured": true,
+      "is_published": true,
+      "created_at": "2026-10-01T16:40:05.896179",
+      "payment_ref": null,
+      "payment_status": "pledged"
+    }
+  ],
+  "site_settings": [
+    {
+      "key": "brand_name",
+      "value": "Maxim Nyansa Electronics",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "brand_phone",
+      "value": "+232 31 950 662",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "brand_email",
+      "value": "michaeljobi@maximnyansa.com",
+      "updated_at": "2026-10-01T16:44:16.540038"
+    },
+    {
+      "key": "brand_address",
+      "value": "5C BaiBureh Road, Ferry Junction, Freetown, Sierra Leone",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "brand_tagline",
+      "value": "Skills Today, Success Tomorrow",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "announcement_active",
+      "value": "false",
+      "updated_at": "2026-10-01T16:44:51.951186"
+    },
+    {
+      "key": "announcement_banner",
+      "value": "New Cohorts starts October 12. Apply now",
+      "updated_at": "2026-10-01T16:44:16.551067"
+    },
+    {
+      "key": "impact_trained",
+      "value": "13",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "impact_practical",
+      "value": "90",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "impact_kits",
+      "value": "10",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "impact_target",
+      "value": "80",
+      "updated_at": "2026-09-29T17:12:12.294704"
+    },
+    {
+      "key": "social_facebook",
+      "value": "https://www.facebook.com/share/1Dd3pZPU5b/?mibextid=wwXIfr",
+      "updated_at": "2026-10-01T16:44:16.563813"
+    },
+    {
+      "key": "social_linkedin",
+      "value": "https://www.linkedin.com/in/michael-jobie-musa-a89388123",
+      "updated_at": "2026-10-01T16:44:16.571550"
+    },
+    {
+      "key": "social_instagram",
+      "value": "https://www.instagram.com/mjobie2009?stkn=MTZzNmlha3VlNmVsaA%3D%3D&utm_source=qr",
+      "updated_at": "2026-10-01T16:44:16.578655"
+    },
+    {
+      "key": "social_youtube",
+      "value": "youtube.com",
+      "updated_at": "2026-10-01T16:44:16.586083"
+    }
+  ],
+  "messages": [],
+  "applications": [
+    {
+      "motivation": "Upskill myself and add value to my organization",
+      "education": "High School",
+      "address": "Lungi",
+      "phone": "+23231950662",
+      "status": "pending",
+      "submitted_at": "2026-09-30T10:50:17.068001",
+      "reviewed_at": null,
+      "reviewer_notes": null
+    }
+  ]
+}

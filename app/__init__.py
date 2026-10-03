@@ -65,6 +65,9 @@ def create_app(config_object=None):
     from .commands import register_commands
     register_commands(app)
 
+    from .backup import register_backup_commands
+    register_backup_commands(app)
+
     # Error handlers
     @app.errorhandler(404)
     def not_found(e):
