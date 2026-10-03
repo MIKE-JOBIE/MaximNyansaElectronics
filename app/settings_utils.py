@@ -4,7 +4,7 @@ from .extensions import db
 DEFAULTS = {
     "brand_name":       "Maxim Nyansa Electronics",
     "brand_phone":      "+232 31 950 662",
-    "brand_email":      "info@maximnyansa.com",
+    "brand_email":      "michaeljobi@maximnyansa.com",
     "brand_address":    "5C BaiBureh Road, Ferry Junction, Freetown, Sierra Leone",
     "brand_tagline":    "Skills Today, Success Tomorrow",
     "announcement_active": "false",
@@ -13,9 +13,10 @@ DEFAULTS = {
     "impact_practical": "90",
     "impact_kits":      "10",
     "impact_target":    "80",
-    "social_facebook":  "",
+    "brand_whatsapp":   "23231950662",          
+    "social_facebook":  "https://www.facebook.com/share/1Dd3pZPU5b/?mibextid=wwXIfr",
     "social_linkedin":  "https://www.linkedin.com/company/maxim-nyansa-foundation/",
-    "social_instagram": "",
+    "social_instagram": "https://www.instagram.com/mjobie2009?stkn=MTZzNmlha3VlNmVsaA%3D%3D&utm_source=qr",
     "social_youtube":   "",
 }
 
