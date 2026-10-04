@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "exported_at": "2026-10-03T13:35:05.482475",
+    "exported_at": "2026-10-04T07:34:25.503341",
     "version": "1.0"
   },
   "categories": [
@@ -276,6 +276,11 @@
       "key": "social_youtube",
       "value": "youtube.com",
       "updated_at": "2026-10-01T16:44:16.586083"
+    },
+    {
+      "key": "brand_whatsapp",
+      "value": "23231950662",
+      "updated_at": "2026-10-03T13:51:57.404386"
     }
   ],
   "messages": [],
@@ -285,9 +290,9 @@
       "education": "High School",
       "address": "Lungi",
       "phone": "+23231950662",
-      "status": "pending",
+      "status": "approved",
       "submitted_at": "2026-09-30T10:50:17.068001",
-      "reviewed_at": null,
+      "reviewed_at": "2026-10-04T07:13:47.922533",
       "reviewer_notes": null
     }
   ]
