@@ -1,18 +1,17 @@
-{% extends "base.html" %}
-{% block content %}
-<section class="section">
-  <div class="container text-center">
-    <div class="section-head"><div class="eyebrow">Order Received</div><h2>Thank you!</h2></div>
-    <p>Your order <strong>{{ order.reference }}</strong> has been received.</p>
-    <p>Status: <span class="badge-status badge-{{ order.status }}">{{ order.status }}</span></p>
-    <p>We'll contact you on {{ order.phone }} to arrange delivery.</p>
-    <a href="{{ url_for('shop.index') }}" class="btn-mn-primary">Continue Shopping</a>
-  </div>
-</section>
-{% endblock %}
-
-{% if order.payment_status != 'paid' %}
-  <a href="{{ url_for('shop.pay', ref=order.reference) }}" class="btn-mn-primary" style="margin-top:1rem">Pay Now</a>
+{% if order.payment_status == 'paid' %}
+  <p style="color:#28a745;font-weight:bold">✅ Payment received</p>
 {% else %}
-  <p style="color:#28a745;font-weight:bold">✅ Paid — thank you!</p>
+  <div style="background:#FAFCF7;padding:2rem;border-radius:14px;max-width:520px;margin:1.5rem auto;border:2px solid #8DC63F">
+    <h3 style="font-family:'Bebas Neue';font-size:1.6rem;margin:0 0 .5rem">
+      Complete Your Payment
+    </h3>
+    <p style="color:#555;font-size:1rem;margin:0 0 1.2rem">
+      Total: <strong style="color:#6FA82E;font-size:1.3rem">Le {{ "{:,.0f}".format(order.total) }}</strong>
+    </p>
+    <a href="{{ url_for('shop.pay', ref=order.reference) }}"
+       class="btn-mn-primary"
+       style="padding:.9rem 2.5rem;font-size:1.05rem;display:inline-block;background:#8DC63F;color:#fff">
+      💳 Pay Now
+    </a>
+  </div>
 {% endif %}

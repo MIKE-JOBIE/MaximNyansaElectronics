@@ -4,8 +4,7 @@ services:
     env: python
     plan: free
     region: frankfurt
-    buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed && flask backup-import"
-    startCommand: "gunicorn wsgi:app --bind 0.0.0.0:$PORT"
+    buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed && (flask backup-import || echo 'Import skipped — no changes')"    startCommand: "gunicorn wsgi:app --bind 0.0.0.0:$PORT"
     healthCheckPath: /
     envVars:
       - key: FLASK_ENV
@@ -17,7 +16,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: ADMIN_EMAIL
-        value: admin@maximnyansa.com
+        value: michaeljobi@maximnyansa.com
       - key: ADMIN_PASSWORD
         sync: false
       - key: CLOUDINARY_CLOUD_NAME

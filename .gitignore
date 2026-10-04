@@ -8,3 +8,5 @@ instance/
 app/static/uploads/*
 !app/static/uploads/.gitkeep
 .pytest_cache/
+test_smtp.py
+app/test_smtp.py

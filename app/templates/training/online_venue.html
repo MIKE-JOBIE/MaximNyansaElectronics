@@ -6,7 +6,7 @@
 <style>
 .venue-hero{
   background:linear-gradient(135deg,#1A1A1A 0%,#2d3a1f 100%);
-  color:#fff;padding:4rem 0 3rem;position:relative;overflow:hidden;
+  color:#fff;padding:5rem 0 4rem;position:relative;overflow:hidden;
 }
 .venue-hero::before{
   content:"";position:absolute;top:-100px;right:-100px;width:400px;height:400px;
@@ -17,38 +17,52 @@
 
 .live-card{
   background:linear-gradient(135deg,#8DC63F,#6FA82E);
-  color:#fff;padding:2rem;border-radius:16px;
+  color:#fff;padding:2.5rem 2rem;border-radius:16px;
   box-shadow:0 12px 40px rgba(141,198,63,.3);
-  position:relative;overflow:hidden;
+  position:relative;overflow:hidden;max-width:760px;margin:0 auto;text-align:center;
 }
 .live-card .dot{
-  display:inline-block;width:10px;height:10px;background:#fff;border-radius:50%;
+  display:inline-block;width:12px;height:12px;background:#fff;border-radius:50%;
   margin-right:.5rem;animation:pulse-dot 1.5s infinite;
 }
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-.live-card h2{color:#fff;font-family:'Bebas Neue';font-size:2rem;margin:0 0 .8rem}
-.live-card p{color:#f0f7e5;margin:0 0 1.5rem}
+.live-card h2{color:#fff;font-family:'Bebas Neue';font-size:2.2rem;margin:1rem 0 .5rem;letter-spacing:.5px}
+.live-card p{color:#f0f7e5;margin:0 0 1.5rem;font-size:1rem}
 
-.venue-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:1.5rem;margin-top:2rem;
+.steps-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;max-width:1100px;margin:2rem auto 0;
 }
-.venue-tile{
-  background:#fff;border-radius:14px;padding:1.8rem 1.5rem;
-  box-shadow:0 6px 20px rgba(0,0,0,.05);transition:.2s;
+.step-card{
+  background:#fff;border-radius:14px;padding:2rem 1.5rem;
+  box-shadow:0 6px 20px rgba(0,0,0,.06);transition:.25s;
   border-top:4px solid #8DC63F;
+  text-decoration:none;color:inherit;display:block;
 }
-.venue-tile:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.1)}
-.venue-tile .ic{font-size:1.8rem;margin-bottom:.8rem}
-.venue-tile h5{font-family:'Bebas Neue';font-size:1.3rem;color:#1A1A1A;margin:0 0 .5rem}
-.venue-tile p{color:#666;font-size:.9rem;margin:0}
+.step-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 16px 40px rgba(0,0,0,.12);
+  color:inherit;
+}
+.step-num{
+  width:60px;height:60px;background:#E8F5D0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue';font-size:2rem;color:#6FA82E;margin-bottom:1rem;
+}
+.step-card h4{font-family:'Bebas Neue';font-size:1.5rem;color:#1A1A1A;margin:0 0 .6rem;letter-spacing:.5px}
+.step-card p{color:#555;font-size:.95rem;margin:0 0 1.2rem;line-height:1.6}
+.step-cta{
+  color:#6FA82E;font-family:'Oswald';font-weight:600;font-size:.85rem;
+  text-transform:uppercase;letter-spacing:.8px;display:inline-block;
+}
+.step-card:hover .step-cta{color:#8DC63F}
 
-.schedule-table td{padding:.8rem 1rem;border-bottom:1px solid #eee;font-size:.9rem}
+.schedule-table td{padding:.9rem 1rem;border-bottom:1px solid #eee;font-size:.95rem}
 .schedule-table tr:last-child td{border-bottom:none}
 .schedule-day{
   display:inline-block;background:#E8F5D0;color:#6FA82E;font-family:'Oswald';
-  font-size:.7rem;letter-spacing:1px;text-transform:uppercase;
-  padding:.15rem .6rem;border-radius:999px;
+  font-size:.72rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:.25rem .7rem;border-radius:999px;
 }
 </style>
 {% endblock %}
@@ -66,45 +80,57 @@
 <section class="section">
   <div class="container">
 
-    <!-- LIVE SESSION -->
+    <!-- LIVE SESSION CARD -->
     <div class="live-card">
       <span class="dot"></span>
-      <span style="font-family:'Oswald';font-size:.8rem;letter-spacing:2px;text-transform:uppercase">Live Now</span>
-      <h2 style="margin-top:.6rem">Practical Workshop — Board Diagnostics</h2>
-      <p>Session in progress · Started 15 minutes ago · Trainer: Michael Musa</p>
-      <a href="#" class="btn-mn-primary"
-         style="background:#fff;color:#6FA82E;padding:.85rem 2rem;font-size:1rem"
-         onclick="alert('Live session link will be shared by your trainer. Check WhatsApp group.');return false;">
-        🎥 Join Session
+      <span style="font-family:'Oswald';font-size:.85rem;letter-spacing:2px;text-transform:uppercase">Session In Progress</span>
+      <h2>Practical Workshop — Board Diagnostics</h2>
+      <p>Started 15 minutes ago · Trainer: Michael Musa</p>
+      <a href="https://wa.me/{{ site.get('brand_whatsapp','23231950662') }}?text=Hi%2C%20please%20send%20me%20the%20live%20session%20link%20for%20today"
+         target="_blank" rel="noopener"
+         style="display:inline-block;background:#fff;color:#6FA82E;padding:.9rem 2rem;border-radius:999px;font-family:'Oswald';font-weight:600;text-transform:uppercase;letter-spacing:.5px;text-decoration:none">
+        🎥 Request Live Link
       </a>
     </div>
 
-    <!-- VENUE TILES -->
-    <div class="venue-grid">
-      <a href="#" class="venue-tile" onclick="alert('Class schedule will be posted here soon.');return false;" style="text-decoration:none">
-        <div class="ic">📅</div>
-        <h5>Class Schedule</h5>
-        <p>See this week's live sessions</p>
+    <!-- THREE STEPS — CLICKABLE -->
+    <div class="section-head text-center" style="margin-top:4rem">
+      <div class="eyebrow">How It Works</div>
+      <h2>Three Simple Steps</h2>
+    </div>
+
+    <div class="steps-grid">
+
+      <!-- STEP 1 -->
+      <a href="https://wa.me/{{ site.get('brand_whatsapp','23231950662') }}?text=Hi%2C%20I%27d%20like%20to%20join%20the%20Maxim%20Nyansa%20trainee%20WhatsApp%20group"
+         target="_blank" rel="noopener" class="step-card">
+        <div class="step-num">1</div>
+        <h4>Join the Group</h4>
+        <p>All enrolled trainees are added to the Maxim Nyansa WhatsApp group.</p>
+        <span class="step-cta">Tap to Join →</span>
       </a>
-      <a href="{{ url_for('library.index') }}" class="venue-tile" style="text-decoration:none">
-        <div class="ic">📚</div>
-        <h5>Course Materials</h5>
-        <p>Slides, handbooks, and reference PDFs</p>
+
+      <!-- STEP 2 -->
+      <a href="https://wa.me/{{ site.get('brand_whatsapp','23231950662') }}?text=Hi%2C%20please%20send%20me%20the%20session%20link%20for%20today"
+         target="_blank" rel="noopener" class="step-card">
+        <div class="step-num">2</div>
+        <h4>Get Session Links</h4>
+        <p>Links are posted in the group 30 minutes before each session.</p>
+        <span class="step-cta">Request Link →</span>
       </a>
-      <a href="{{ url_for('library.videos') }}" class="venue-tile" style="text-decoration:none">
-        <div class="ic">🎬</div>
-        <h5>Recorded Sessions</h5>
-        <p>Missed a class? Watch it here</p>
+
+      <!-- STEP 3 -->
+      <a href="{{ url_for('library.videos') }}" class="step-card">
+        <div class="step-num">3</div>
+        <h4>Attend &amp; Learn</h4>
+        <p>Sessions are recorded and posted here afterwards.</p>
+        <span class="step-cta">View Recordings →</span>
       </a>
-      <a href="https://wa.me/23231950662" class="venue-tile" target="_blank" rel="noopener" style="text-decoration:none">
-        <div class="ic">💬</div>
-        <h5>Ask a Trainer</h5>
-        <p>Get help between sessions</p>
-      </a>
+
     </div>
 
     <!-- WEEKLY SCHEDULE -->
-    <div style="margin-top:3rem">
+    <div style="margin-top:4rem">
       <div class="section-head">
         <div class="eyebrow">This Week</div>
         <h2>Session Schedule</h2>
@@ -138,22 +164,29 @@
       </p>
     </div>
 
-    <!-- HOW IT WORKS -->
-    <div style="margin-top:3rem;background:#FAFCF7;padding:2rem;border-radius:14px">
-      <h3 style="font-family:'Bebas Neue';font-size:1.6rem;margin:0 0 1rem">How It Works</h3>
-      <div class="row">
-        <div class="col-md-4">
-          <strong style="color:#6FA82E">1. Join the group</strong>
-          <p style="font-size:.9rem;color:#555;margin:.3rem 0 0">All enrolled trainees are added to the Maxim Nyansa WhatsApp group.</p>
-        </div>
-        <div class="col-md-4">
-          <strong style="color:#6FA82E">2. Get session links</strong>
-          <p style="font-size:.9rem;color:#555;margin:.3rem 0 0">Links are posted 30 minutes before each session.</p>
-        </div>
-        <div class="col-md-4">
-          <strong style="color:#6FA82E">3. Attend &amp; learn</strong>
-          <p style="font-size:.9rem;color:#555;margin:.3rem 0 0">Sessions are recorded and posted here afterwards.</p>
-        </div>
+    <!-- QUICK LINKS -->
+    <div style="margin-top:4rem;background:#FAFCF7;padding:2.5rem;border-radius:14px">
+      <h3 style="font-family:'Bebas Neue';font-size:1.7rem;margin:0 0 1.5rem;text-align:center">Quick Links</h3>
+      <div class="steps-grid" style="margin:0">
+        <a href="{{ url_for('library.index') }}" class="step-card">
+          <div class="step-num">📚</div>
+          <h4>Course Materials</h4>
+          <p>Slides, handbooks, and reference PDFs from all sessions.</p>
+          <span class="step-cta">Browse Library →</span>
+        </a>
+        <a href="{{ url_for('library.videos') }}" class="step-card">
+          <div class="step-num">🎬</div>
+          <h4>Recorded Sessions</h4>
+          <p>Missed a class? Watch recordings at your own pace.</p>
+          <span class="step-cta">Watch Videos →</span>
+        </a>
+        <a href="https://wa.me/{{ site.get('brand_whatsapp','23231950662') }}?text=Hi%2C%20I%20have%20a%20question%20about%20the%20training"
+           target="_blank" rel="noopener" class="step-card">
+          <div class="step-num">💬</div>
+          <h4>Ask a Trainer</h4>
+          <p>Get help between sessions via WhatsApp.</p>
+          <span class="step-cta">Chat Now →</span>
+        </a>
       </div>
     </div>
 
