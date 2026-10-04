@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Complete Payment — {{ brand_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width:640px">
+    <div class="section-head text-center">
+      <div class="eyebrow">Payment</div>
+      <h2>Complete Your Payment</h2>
+    </div>
+
+    <div class="mn-card" style="padding:2rem">
+      <p><strong>Order:</strong> {{ order.reference }}</p>
+      <p><strong>Amount:</strong> Le {{ "{:,.0f}".format(order.total) }}</p>
+      <p><strong>Status:</strong> <span class="badge-status badge-{{ order.status }}">{{ order.status }}</span></p>
+
+      <hr style="margin:1.5rem 0;border:none;border-top:1px solid #eee">
+
+      <h4 style="font-family:'Bebas Neue';font-size:1.4rem;margin:0 0 1rem">Payment Options</h4>
+
+      <div style="background:#FAFCF7;padding:1.2rem;border-radius:10px;margin-top:1rem">
+        <strong>📱 Orange Money / Africell Money</strong>
+        <p style="margin:.3rem 0 0;font-size:.9rem">Send to: <strong>{{ brand_phone }}</strong></p>
+        <p style="margin:.3rem 0 0;font-size:.85rem;color:#666">
+          Reference: <strong>{{ order.reference }}</strong>
+        </p>
+      </div>
+
+      <div style="background:#FAFCF7;padding:1.2rem;border-radius:10px;margin-top:1rem">
+        <strong>🏦 Bank Transfer</strong>
+        <p style="margin:.3rem 0 0;font-size:.9rem">
+          Contact us at <a href="mailto:{{ brand_email }}">{{ brand_email }}</a> for bank details.
+        </p>
+      </div>
+
+      <div style="background:#FAFCF7;padding:1.2rem;border-radius:10px;margin-top:1rem">
+        <strong>💬 WhatsApp</strong>
+        <p style="margin:.3rem 0 0;font-size:.9rem">
+          <a href="https://wa.me/{{ site.get('brand_whatsapp','23231950662') }}?text=Order%20{{ order.reference }}"
+             target="_blank" rel="noopener">
+            Chat with us now
+          </a>
+        </p>
+      </div>
+
+      <p style="font-size:.85rem;color:#666;margin-top:1.5rem">
+        Once paid, email proof of payment to <strong>{{ brand_email }}</strong> and we'll confirm your order.
+      </p>
+
+      <p style="margin-top:1.5rem">
+        <a href="{{ url_for('shop.order_detail', ref=order.reference) }}" class="btn-mn-outline btn-sm">Back to Order</a>
+        <a href="{{ url_for('shop.index') }}" class="btn-mn-outline btn-sm">Continue Shopping</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

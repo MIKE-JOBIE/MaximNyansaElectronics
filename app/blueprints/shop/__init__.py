@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, session, request, abort
+from flask import Blueprint, render_template, redirect, url_for, flash, session, request, current_app, abort
 from flask_login import login_required, current_user
 from ...models import Product, Category, Order, OrderItem
 from ...forms import CheckoutForm
 from ...extensions import db
 from ...utils import gen_ref
+from ...payments import is_configured as paystack_ready, initialize_transaction, verify_transaction
+
 
 shop_bp = Blueprint("shop", __name__, template_folder="../../templates/shop")
 
@@ -155,36 +157,40 @@ def pay(ref):
     """Start a Paystack payment for an order."""
     o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
 
-    # If already paid, don't re-charge
     if o.payment_status == "paid":
         flash("This order is already paid.", "info")
         return redirect(url_for("shop.order_detail", ref=o.reference))
 
-    # If Paystack isn't configured, show manual instructions
     if not paystack_ready():
         return render_template("shop/pay_manual.html", order=o)
 
-    callback = url_for("shop.pay_callback", ref=o.reference, _external=True)
-    # Paystack expects amount in smallest unit. For SLE/NGN, use *100.
-    amount_minor = int(float(o.total) * 100)
+    try:
+        callback = url_for("shop.pay_callback", ref=o.reference, _external=True)
+        amount_minor = int(float(o.total) * 100)
 
-    data = initialize_transaction(
-        email=current_user.email,
-        amount_minor=amount_minor,
-        reference=o.reference,
-        callback_url=callback,
-        metadata={
-            "type": "order",
-            "order_id": o.id,
-            "user_id": current_user.id,
-            "custom_fields": [
-                {"display_name": "Order Reference", "variable_name": "order_ref", "value": o.reference},
-            ],
-        },
-    )
-    if not data:
+        data = initialize_transaction(
+            email=current_user.email,
+            amount_minor=amount_minor,
+            reference=o.reference,
+            callback_url=callback,
+            metadata={
+                "type": "order",
+                "order_id": o.id,
+                "user_id": current_user.id,
+                "custom_fields": [
+                    {"display_name": "Order Reference", "variable_name": "order_ref", "value": o.reference},
+                ],
+            },
+        )
+    except Exception as e:
+        current_app.logger.exception(f"Paystack init failed for {o.reference}: {e}")
         flash("Could not start payment. Please try again or contact us.", "danger")
-        return redirect(url_for("shop.order_detail", ref=o.reference))
+        return render_template("shop/pay_manual.html", order=o)
+
+    if not data or not data.get("authorization_url"):
+        current_app.logger.error(f"Paystack returned no auth URL: {data}")
+        flash("Payment provider unavailable. Please use manual payment.", "warning")
+        return render_template("shop/pay_manual.html", order=o)
 
     o.payment_ref = o.reference
     o.payment_status = "initiated"
