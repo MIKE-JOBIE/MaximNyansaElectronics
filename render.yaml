@@ -27,17 +27,17 @@ services:
       - key: CLOUDINARY_API_SECRET
         sync: false
       - key: MAIL_SERVER
-        value: smtp.gmail.com
+        value: mail.maximnyansa.com
       - key: MAIL_PORT
-        value: "587"
+        value: "465"
       - key: MAIL_USE_TLS
-        value: "True"
+        value: "False"
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
         sync: false
       - key: MAIL_DEFAULT_SENDER
-        value: info@maximnyansa.com
+        value: michaeljobi@maximnyansa.com
       - key: PAYSTACK_SECRET_KEY
         sync: false
       - key: PAYSTACK_PUBLIC_KEY
