@@ -3,9 +3,9 @@
 <div class="admin-header"><h1>{{ 'Edit Post' if post else 'New Post' }}</h1></div>
 <form method="POST" enctype="multipart/form-data" class="mn-form" style="margin-top:0;max-width:820px">
   {{ form.hidden_tag() }}
-  <label>Title</label>{{ form.title() }}
+  {{ form.title.label }}{{ form.title() }}
   <label>Body</label>{{ form.body(rows=12, style="min-height:280px") }}
-  <label>Cover Image</label>{{ form.cover_image() }}
+  {{ form.cover_image.label }}{{ form.cover_image() }}
   <div style="margin-top:1.5rem">{{ form.submit(class="btn-mn-primary") }}</div>
 </form>
 {% endblock %}

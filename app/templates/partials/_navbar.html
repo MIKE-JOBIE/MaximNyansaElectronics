@@ -9,6 +9,7 @@
 <nav class="mn-navbar">
   <div class="container mn-navbar-inner">
 
+    {# ── LOGO ── #}
     <a class="navbar-brand" href="{{ url_for('main.index') }}"
        aria-label="Maxim Nyansa Electronics — Home">
       <img src="{{ url_for('static', filename='img/logo.png') }}"
@@ -16,12 +17,18 @@
            class="brand-logo">
     </a>
 
-    <button class="navbar-toggler" type="button" aria-label="Toggle navigation"
-            onclick="document.getElementById('nav').classList.toggle('open')">☰</button>
+    {# ── HAMBURGER ── #}
+    <button class="navbar-toggler" type="button"
+            aria-label="Toggle navigation"
+            aria-controls="nav"
+            aria-expanded="false"
+            onclick="var n=document.getElementById('nav');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">
+      ☰
+    </button>
 
+    {# ── NAV LINKS ── #}
     <div id="nav" class="mn-nav-links">
 
-      {# ── All 11 public navigation links with ACTIVE state ── #}
       <a class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}"
          href="{{ url_for('main.index') }}">Home</a>
 
@@ -55,18 +62,17 @@
       <a class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}"
          href="{{ url_for('main.contact') }}">Contact</a>
 
-      {# ── Account actions ── #}
+      {# ── ACCOUNT ACTIONS ── #}
       {% if current_user.is_authenticated %}
+
         <span class="nav-divider" aria-hidden="true"></span>
 
         <a class="nav-action" href="{{ url_for('shop.cart_view') }}" title="View cart">
-         🛒 Cart
-         {% if cart_count > 0 %}
-           <span style="background:#F5A623;color:#fff;border-radius:999px;padding:.05rem .4rem;font-size:.65rem;margin-left:.3rem">
-             {{ cart_count }}
-           </span>
-         {% endif %}
-       </a>
+          🛒 Cart
+          {% if cart_count and cart_count > 0 %}
+            <span class="nav-cart-badge">{{ cart_count }}</span>
+          {% endif %}
+        </a>
 
         <a class="nav-action" href="{{ url_for('auth.profile') }}">
           {{ current_user.first_name or 'Account' }}
@@ -79,13 +85,24 @@
           </a>
         {% endif %}
 
-        <a class="nav-action nav-action-muted" href="{{ url_for('auth.logout') }}">
-          Logout
-        </a>
+        <form method="POST" action="{{ url_for('auth.logout') }}" class="nav-logout-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="nav-logout-btn" title="Log out">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            <span>Logout</span>
+          </button>
+        </form>
+
       {% else %}
+
         <span class="nav-divider" aria-hidden="true"></span>
         <a class="nav-action" href="{{ url_for('auth.login') }}">Login</a>
         <a class="nav-action nav-action-primary" href="{{ url_for('auth.register') }}">Apply Now</a>
+
       {% endif %}
 
     </div>

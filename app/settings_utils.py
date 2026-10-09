@@ -1,5 +1,17 @@
+import time
+
+from flask import current_app
 from .models import SiteSetting
 from .extensions import db
+
+# Site settings are read on every page. Cache them briefly per process so a busy
+# site does not hit the database for them on every single request.
+_CACHE = {"at": 0.0, "value": None}
+_TTL_SECONDS = 60
+
+
+def invalidate_cache():
+    _CACHE["value"] = None
 
 DEFAULTS = {
     "brand_name":       "Maxim Nyansa Electronics",
@@ -33,6 +45,12 @@ def get_setting(key, default=None):
 
 
 def get_all_settings():
+    use_cache = not current_app.testing
+    now = time.monotonic()
+    if use_cache and _CACHE["value"] is not None and now - _CACHE["at"] < _TTL_SECONDS:
+        return dict(_CACHE["value"])
     result = dict(DEFAULTS)
     result.update(SiteSetting.all_dict())
-    return result
+    if use_cache:
+        _CACHE.update(at=now, value=result)
+    return dict(result)

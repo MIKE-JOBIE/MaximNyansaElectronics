@@ -4,7 +4,8 @@ services:
     env: python
     plan: free
     region: frankfurt
-    buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed && (flask backup-import || echo 'Import skipped — no changes')"    startCommand: "gunicorn wsgi:app --bind 0.0.0.0:$PORT"
+    buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed && (flask backup-import || echo 'Import skipped — no changes')"
+    startCommand: "gunicorn wsgi:app -c gunicorn.conf.py"
     healthCheckPath: /
     envVars:
       - key: FLASK_ENV
@@ -45,3 +46,19 @@ services:
         value: "true"
       - key: SITE_URL
         value: "https://maxim-nyansa-electronics.onrender.com"
+      - key: ALLOWED_HOSTS
+        value: "maxim-nyansa-electronics.onrender.com"
+      - key: TRUSTED_PROXY_COUNT
+        value: "1"
+      - key: RATELIMIT_STORAGE_URI
+        sync: false          # e.g. a Render Key Value / Upstash Redis URL
+      - key: PAYSTACK_CURRENCY
+        sync: false          # currency of your Paystack account
+
+
+# Optional scheduled cleanup: add this cron job in Render when order volume grows.
+# - type: cron
+#   name: maxim-electronics-order-cleanup
+#   schedule: "*/15 * * * *"
+#   buildCommand: "pip install -r requirements.txt"
+#   startCommand: "flask --app wsgi release-stale-orders --minutes 60"

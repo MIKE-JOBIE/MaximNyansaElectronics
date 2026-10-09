@@ -19,6 +19,14 @@ class User(UserMixin, db.Model):
     applications  = db.relationship("Application", backref="applicant", lazy="dynamic", cascade="all, delete-orphan")
     orders        = db.relationship("Order", backref="customer", lazy="dynamic")
 
+    @property
+    def session_tag(self):
+        """Changes whenever the password changes -> old sessions stop working."""
+        return (self.password_hash or "")[-12:]
+
+    def get_id(self):
+        return f"{self.id}:{self.session_tag}"
+
     def set_password(self, pw): self.password_hash = generate_password_hash(pw)
     def check_password(self, pw): return check_password_hash(self.password_hash, pw)
     @property
@@ -47,13 +55,13 @@ class Program(db.Model):
 class Application(db.Model):
     __tablename__ = "applications"
     id             = db.Column(db.Integer, primary_key=True)
-    user_id        = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    program_id     = db.Column(db.Integer, db.ForeignKey("programs.id"), nullable=False)
+    user_id        = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    program_id     = db.Column(db.Integer, db.ForeignKey("programs.id"), nullable=False, index=True)
     motivation     = db.Column(db.Text)
     education      = db.Column(db.String(200))
     address        = db.Column(db.String(255))
     phone          = db.Column(db.String(40))
-    status         = db.Column(db.String(20), default="pending")
+    status         = db.Column(db.String(20), default="pending", index=True)
     submitted_at   = db.Column(db.DateTime, default=datetime.utcnow)
     reviewed_at    = db.Column(db.DateTime)
     reviewer_notes = db.Column(db.Text)
@@ -81,17 +89,19 @@ class Product(db.Model):
 
 class Order(db.Model):
     __tablename__ = "orders"
-    id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"))
-    total      = db.Column(db.Numeric(10, 2), default=0)
-    status     = db.Column(db.String(20), default="pending")
-    reference  = db.Column(db.String(40), unique=True)
-    full_name  = db.Column(db.String(120))
-    phone      = db.Column(db.String(40))
-    address    = db.Column(db.String(255))
-    notes      = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    items      = db.relationship("OrderItem", backref="order", cascade="all, delete-orphan")
+    id             = db.Column(db.Integer, primary_key=True)
+    user_id        = db.Column(db.Integer, db.ForeignKey("users.id"), index=True)
+    total          = db.Column(db.Numeric(10, 2), default=0)
+    status         = db.Column(db.String(20), default="pending")
+    reference      = db.Column(db.String(40), unique=True)
+    full_name      = db.Column(db.String(120))
+    phone          = db.Column(db.String(40))
+    address        = db.Column(db.String(255))
+    notes          = db.Column(db.Text)
+    payment_ref    = db.Column(db.String(80), index=True)          # ← add if missing
+    payment_status = db.Column(db.String(20), default="unpaid")    # ← add if missing
+    created_at     = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    items          = db.relationship("OrderItem", backref="order", cascade="all, delete-orphan")
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"
@@ -114,15 +124,17 @@ class Resource(db.Model):
 
 class Donation(db.Model):
     __tablename__ = "donations"
-    id          = db.Column(db.Integer, primary_key=True)
-    donor_name  = db.Column(db.String(120))
-    email       = db.Column(db.String(120))
-    amount      = db.Column(db.Numeric(10, 2))
-    currency    = db.Column(db.String(5), default="USD")
-    message     = db.Column(db.Text)
-    reference   = db.Column(db.String(60))
-    verified    = db.Column(db.Boolean, default=False)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    id             = db.Column(db.Integer, primary_key=True)
+    donor_name     = db.Column(db.String(120))
+    email          = db.Column(db.String(120))
+    amount         = db.Column(db.Numeric(10, 2))
+    currency       = db.Column(db.String(5), default="USD")
+    message        = db.Column(db.Text)
+    reference      = db.Column(db.String(60))
+    verified       = db.Column(db.Boolean, default=False)
+    payment_ref    = db.Column(db.String(80), index=True)          # ← add if missing
+    payment_status = db.Column(db.String(20), default="pledged")   # ← add if missing
+    created_at     = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Post(db.Model):
     __tablename__ = "posts"
@@ -200,8 +212,15 @@ class VideoTestimonial(db.Model):
     program = db.relationship("Program")
 
 
-    payment_ref   = db.Column(db.String(80), index=True)
-    payment_status= db.Column(db.String(20), default="unpaid")  # unpaid|paid|failed
-
-    payment_ref   = db.Column(db.String(80), index=True)
-    payment_status= db.Column(db.String(20), default="pledged")  # pledged|paid|failed
+class AuditLog(db.Model):
+    __tablename__ = "audit_logs"
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    action     = db.Column(db.String(120), nullable=False, index=True)
+    entity     = db.Column(db.String(80), nullable=True, index=True)
+    entity_id  = db.Column(db.String(80), nullable=True, index=True)
+    details    = db.Column(db.Text, nullable=True)
+    ip_address = db.Column(db.String(64), nullable=True)
+    user_agent = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    user       = db.relationship("User", backref="audit_logs")

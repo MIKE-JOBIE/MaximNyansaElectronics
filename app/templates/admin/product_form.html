@@ -3,14 +3,14 @@
 <div class="admin-header"><h1>{{ 'Edit Product' if product else 'New Product' }}</h1></div>
 <form method="POST" enctype="multipart/form-data" class="mn-form" style="margin-top:0">
   {{ form.hidden_tag() }}
-  <label>Name</label>{{ form.name() }}
-  <label>Description</label>{{ form.description() }}
-  <label>Price</label>{{ form.price() }}
-  <label>Stock</label>{{ form.stock() }}
-  <label>Condition</label>{{ form.condition() }}
-  <label>Category</label>{{ form.category_id() }}
-  <label>Image</label>{{ form.image() }}
-  <label>Active</label>{{ form.is_active() }}
+  {{ form.name.label }}{{ form.name() }}
+  {{ form.description.label }}{{ form.description() }}
+  {{ form.price.label }}{{ form.price() }}
+  {{ form.stock.label }}{{ form.stock() }}
+  {{ form.condition.label }}{{ form.condition() }}
+  {{ form.category_id.label }}{{ form.category_id() }}
+  {{ form.image.label }}{{ form.image() }}
+  {{ form.is_active.label }}{{ form.is_active() }}
   <div style="margin-top:1rem">{{ form.submit(class="btn-mn-primary") }}</div>
 </form>
 {% endblock %}

@@ -1,4 +1,11 @@
+import os
+
 from app import create_app
+
 app = create_app()
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Local development only. In production run: gunicorn wsgi:app -c gunicorn.conf.py
+    app.run(host=os.getenv("HOST", "127.0.0.1"),
+            port=int(os.getenv("PORT", "5000")),
+            debug=os.getenv("FLASK_DEBUG") == "1")

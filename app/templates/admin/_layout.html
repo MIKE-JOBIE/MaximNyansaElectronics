@@ -29,7 +29,7 @@
       <strong>{{ current_user.full_name }}</strong>
       <span>{{ current_user.role }}</span>
     </div>
-    <a href="{{ url_for('auth.logout') }}" class="admin-logout">Logout</a>
+    <form method="POST" action="{{ url_for('auth.logout') }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="admin-logout" style="background:none;border:0;cursor:pointer">Logout</button></form>
   </aside>
 
   {# ═══ MAIN ═══ #}

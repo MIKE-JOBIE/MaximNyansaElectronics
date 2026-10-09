@@ -1,22 +1,23 @@
-# Use an official Python runtime as a parent image
 FROM python:3.11-slim
 
-# Set the working directory in the container
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    FLASK_APP=wsgi.py \
+    FLASK_ENV=production
+
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application's code
 COPY . .
 
-# Expose the port that the app runs on
+# Run as an unprivileged user, not root
+RUN useradd --create-home --uid 10001 app && chown -R app:app /app
+USER app
+
 EXPOSE 5000
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD python -c "import os,urllib.request;urllib.request.urlopen('http://127.0.0.1:%s/health' % os.getenv('PORT','5000'), timeout=4)" || exit 1
 
-# Set environment variables for Flask
-ENV FLASK_APP=wsgi.py
-ENV FLASK_ENV=production
-
-# Run the application with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "wsgi:app", "-c", "gunicorn.conf.py"]

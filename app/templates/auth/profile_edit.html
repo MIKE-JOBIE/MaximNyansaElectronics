@@ -7,10 +7,10 @@
       <div class="section-head text-center" style="margin-bottom:1rem">
         <div class="eyebrow">Account</div><h2>Edit Profile</h2>
       </div>
-      <label>First Name</label>{{ form.first_name() }}
-      <label>Last Name</label>{{ form.last_name() }}
-      <label>Phone</label>{{ form.phone() }}
-      <label>Address</label>{{ form.address() }}
+      {{ form.first_name.label }}{{ form.first_name() }}
+      {{ form.last_name.label }}{{ form.last_name() }}
+      {{ form.phone.label }}{{ form.phone() }}
+      {{ form.address.label }}{{ form.address() }}
       <div style="margin-top:1.2rem">{{ form.submit(class="btn-mn-primary", style="width:100%") }}</div>
     </form>
   </div>

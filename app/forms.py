@@ -1,13 +1,36 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SubmitField, SelectField, IntegerField, DecimalField, DateField, FileField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional, NumberRange
+from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional, NumberRange, ValidationError
+
+_COMMON_PASSWORDS = {
+    "password", "password1", "password123", "1234567890", "12345678910", "qwertyuiop",
+    "iloveyou123", "admin12345", "welcome123", "letmein123", "maximnyansa",
+}
+
+
+def strong_password(form, field):
+    """At least 10 chars (enforced by Length) and not trivially guessable."""
+    pw = field.data or ""
+    if pw.isdigit():
+        raise ValidationError("Password cannot be only numbers.")
+    if pw.lower() in _COMMON_PASSWORDS or len(set(pw)) < 4:
+        raise ValidationError("That password is too easy to guess. Try a longer phrase.")
+    email = getattr(getattr(form, "email", None), "data", "") or ""
+    if email and pw.lower() == email.lower():
+        raise ValidationError("Password cannot be the same as your email.")
+
+
+def http_url(form, field):
+    """Only allow http(s) links (blocks javascript: and data: URLs)."""
+    if field.data and not field.data.strip().lower().startswith(("http://", "https://")):
+        raise ValidationError("Enter a full link starting with http:// or https://")
 
 class RegisterForm(FlaskForm):
     first_name = StringField("First Name", validators=[DataRequired(), Length(2, 80)])
     last_name  = StringField("Last Name", validators=[DataRequired(), Length(2, 80)])
     email      = StringField("Email", validators=[DataRequired(), Email()])
     phone      = StringField("Phone", validators=[Optional(), Length(5, 40)])
-    password   = PasswordField("Password", validators=[DataRequired(), Length(6, 128)])
+    password   = PasswordField("Password", validators=[DataRequired(), Length(10, 128), strong_password])
     confirm    = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo("password")])
     submit     = SubmitField("Create Account")
 
@@ -34,7 +57,7 @@ class ContactForm(FlaskForm):
 class DonationForm(FlaskForm):
     donor_name = StringField("Full Name", validators=[DataRequired()])
     email      = StringField("Email", validators=[DataRequired(), Email()])
-    amount     = DecimalField("Amount", places=2, validators=[DataRequired(), NumberRange(min=1)])
+    amount     = DecimalField("Amount", places=2, validators=[DataRequired(), NumberRange(min=1, max=1000000)])
     currency   = SelectField("Currency", choices=[("USD","USD"),("SLE","SLE"),("EUR","EUR")], default="USD")
     message    = TextAreaField("Message (optional)", validators=[Optional()])
     submit     = SubmitField("Pledge Donation")
@@ -72,7 +95,7 @@ class ResourceForm(FlaskForm):
     description = TextAreaField("Description", validators=[DataRequired()])
     category    = StringField("Category", validators=[DataRequired()])
     file        = FileField("File (PDF / DOC / link file)")
-    file_url    = StringField("Or external URL", validators=[Optional()])
+    file_url    = StringField("Or external URL", validators=[Optional(), http_url])
     submit      = SubmitField("Save Resource")
 
 class ForgotPasswordForm(FlaskForm):
@@ -81,7 +104,7 @@ class ForgotPasswordForm(FlaskForm):
 
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField("New Password", validators=[DataRequired(), Length(6, 128)])
+    password = PasswordField("New Password", validators=[DataRequired(), Length(10, 128), strong_password])
     confirm  = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo("password")])
     submit   = SubmitField("Set New Password")
 
@@ -96,7 +119,7 @@ class ProfileForm(FlaskForm):
 
 class ChangePasswordForm(FlaskForm):
     current  = PasswordField("Current Password", validators=[DataRequired()])
-    password = PasswordField("New Password", validators=[DataRequired(), Length(6, 128)])
+    password = PasswordField("New Password", validators=[DataRequired(), Length(10, 128), strong_password])
     confirm  = PasswordField("Confirm New Password", validators=[DataRequired(), EqualTo("password")])
     submit   = SubmitField("Change Password")
 
@@ -124,7 +147,7 @@ class VideoForm(FlaskForm):
     trainee_name = StringField("Trainee Name (optional)", validators=[Optional(), Length(2, 120)])
     description  = TextAreaField("Description (optional)", validators=[Optional()])
     video_url    = StringField("Video URL (YouTube/Vimeo/MP4)",
-                               validators=[DataRequired(), Length(5, 500)])
+                               validators=[DataRequired(), Length(5, 500), http_url])
     program_id   = SelectField("Program (optional)", coerce=int, validators=[Optional()])
     thumbnail    = FileField("Thumbnail (optional)")
     featured     = SelectField("Featured?", choices=[("no","No"),("yes","Yes")], default="no")

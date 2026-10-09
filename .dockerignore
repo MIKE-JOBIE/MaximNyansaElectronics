@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.*
+venv
+__pycache__
+*.pyc
+*.db
+instance
+tests
+.pytest_cache
+app/static/uploads/*
+test_smtp.py

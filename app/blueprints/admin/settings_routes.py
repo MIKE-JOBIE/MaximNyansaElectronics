@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from functools import wraps
 from ...extensions import db
 from ...models import SiteSetting
-from ...settings_utils import DEFAULTS
+from ...settings_utils import DEFAULTS, invalidate_cache
 
 def admin_required(f):
     @wraps(f)
@@ -22,12 +22,12 @@ def register_settings_routes(bp):
     def settings():
         if request.method == "POST":
             for key in request.form:
-                if key.startswith("field_"):
-                    setting_key = key[6:]  # strip 'field_'
-                    SiteSetting.set(setting_key, request.form[key])
+                if key.startswith("field_") and key[6:] in DEFAULTS:   # only known settings
+                    SiteSetting.set(key[6:], request.form[key])
             # Handle checkboxes (they don't appear if unchecked)
             SiteSetting.set("announcement_active",
                             "true" if request.form.get("announcement_active") == "on" else "false")
+            invalidate_cache()
             flash("Settings saved.", "success")
             return redirect(url_for("admin.settings"))
 

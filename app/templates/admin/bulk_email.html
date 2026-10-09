@@ -8,9 +8,9 @@
       {{ form.hidden_tag() }}
       <div class="section-head"><h2 style="font-size:1.6rem">Compose</h2></div>
 
-      <label>Send To (Program)</label>{{ form.program_id() }}
-      <label>Filter by status</label>{{ form.status() }}
-      <label>Subject</label>{{ form.subject() }}
+      {{ form.program_id.label }}{{ form.program_id() }}
+      {{ form.status.label }}{{ form.status() }}
+      {{ form.subject.label }}{{ form.subject() }}
       <label>Message</label>{{ form.body(rows=10, style="min-height:220px") }}
 
       <p class="text-muted" style="font-size:.85rem">

@@ -34,11 +34,11 @@
         <form method="POST" class="mn-form" style="margin-top:0">
           {{ form.hidden_tag() }}
           <h5 style="font-family:'Bebas Neue';font-size:1.6rem;margin:0 0 1rem">Pledge a Donation</h5>
-          <label>Full Name</label>{{ form.donor_name() }}
-          <label>Email</label>{{ form.email() }}
-          <label>Amount</label>{{ form.amount() }}
-          <label>Currency</label>{{ form.currency() }}
-          <label>Message (optional)</label>{{ form.message() }}
+          {{ form.donor_name.label }}{{ form.donor_name() }}
+          {{ form.email.label }}{{ form.email() }}
+          {{ form.amount.label }}{{ form.amount() }}
+          {{ form.currency.label }}{{ form.currency() }}
+          {{ form.message.label }}{{ form.message() }}
           <div style="margin-top:1rem">{{ form.submit(class="btn-mn-primary", style="width:100%") }}</div>
         </form>
       </div>

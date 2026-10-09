@@ -4,7 +4,11 @@ Every image is center-cropped to a fixed aspect ratio, then resized,
 so templates always render clean, consistent cards.
 """
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
+
+# Reject "decompression bombs" (tiny files that expand to gigantic images)
+Image.MAX_IMAGE_PIXELS = 40_000_000
+ALLOWED_FORMATS = {"JPEG", "PNG", "WEBP", "GIF"}
 
 # Central registry — change once, applies everywhere
 IMAGE_PRESETS = {
@@ -33,6 +37,9 @@ def resize_and_crop(image_bytes, preset_or_size, quality=88):
         target_w, target_h = preset_or_size
 
     img = Image.open(BytesIO(image_bytes))
+    if img.format not in ALLOWED_FORMATS:
+        raise ValueError(f"Unsupported image format: {img.format}")
+    img = ImageOps.exif_transpose(img)
     if img.mode in ("RGBA", "P", "LA"):
         bg = Image.new("RGB", img.size, (255, 255, 255))
         bg.paste(img, mask=img.convert("RGBA").split()[-1] if img.mode == "RGBA" else None)

@@ -1,6 +1,6 @@
 from datetime import datetime
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, send_file, current_app
 from flask_login import login_required, current_user
 from io import BytesIO
 
@@ -8,8 +8,9 @@ from ...models import (User, Program, Application, Product, Category,
                        Order, Resource, Donation, Message, Post, VideoTestimonial)
 from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm, VideoForm
 from ...extensions import db
-from ...utils import slugify, save_upload
+from ...utils import slugify, save_upload, audit_log
 from ...certificate import generate_certificate
+from ..shop import restore_order_stock
 from .settings_routes import register_settings_routes
 from .bulk_routes import register_bulk_routes
 
@@ -48,9 +49,11 @@ def dashboard():
     today = datetime.utcnow().date()
     days = [(today - timedelta(days=i)) for i in range(13, -1, -1)]
     chart_apps = {"labels": [d.strftime("%b %d") for d in days], "values": []}
-    for d in days:
-        count = Application.query.filter(func.date(Application.submitted_at) == d).count()
-        chart_apps["values"].append(count)
+    rows = (db.session.query(func.date(Application.submitted_at), func.count(Application.id))
+            .filter(Application.submitted_at >= datetime.combine(days[0], datetime.min.time()))
+            .group_by(func.date(Application.submitted_at)).all())
+    by_day = {str(r[0]): r[1] for r in rows}      # one query instead of 14
+    chart_apps["values"] = [by_day.get(d.isoformat(), 0) for d in days]
 
     status_counts = dict(
         db.session.query(Application.status, func.count(Application.id))
@@ -79,8 +82,9 @@ def applications():
     q = Application.query
     if status:
         q = q.filter_by(status=status)
-    apps = q.order_by(Application.submitted_at.desc()).all()
-    return render_template("admin/applications.html", applications=apps, status=status)
+    page = request.args.get("page", 1, type=int)
+    pagination = q.order_by(Application.submitted_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/applications.html", applications=pagination.items, pagination=pagination, status=status)
 
 
 @admin_bp.route("/applications/<int:aid>/<action>", methods=["POST"])
@@ -91,6 +95,7 @@ def application_action(aid, action):
     if action in ("approve", "reject", "enroll"):
         a.status = {"approve": "approved", "reject": "rejected", "enroll": "enrolled"}[action]
         a.reviewed_at = datetime.utcnow()
+        audit_log("application_status_change", "application", a.id, {"status": a.status})
         db.session.commit()
         flash(f"Application {a.status}.", "success")
     return redirect(url_for("admin.applications"))
@@ -101,8 +106,9 @@ def application_action(aid, action):
 @login_required
 @admin_required
 def programs():
-    return render_template("admin/programs.html",
-                           programs=Program.query.order_by(Program.created_at.desc()).all())
+    page = request.args.get("page", 1, type=int)
+    pagination = Program.query.order_by(Program.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/programs.html", programs=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/programs/new", methods=["GET", "POST"])
@@ -151,8 +157,9 @@ def program_edit(pid):
 @login_required
 @admin_required
 def products():
-    return render_template("admin/products.html",
-                           products=Product.query.order_by(Product.created_at.desc()).all())
+    page = request.args.get("page", 1, type=int)
+    pagination = Product.query.order_by(Product.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/products.html", products=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/products/new", methods=["GET", "POST"])
@@ -207,16 +214,26 @@ def product_edit(pid):
 @login_required
 @admin_required
 def orders():
-    return render_template("admin/orders.html",
-                           orders=Order.query.order_by(Order.created_at.desc()).all())
+    page = request.args.get("page", 1, type=int)
+    pagination = Order.query.order_by(Order.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/orders.html", orders=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/orders/<int:oid>/<status>", methods=["POST"])
 @login_required
 @admin_required
 def order_status(oid, status):
-    o = Order.query.get_or_404(oid)
+    o = Order.query.filter_by(id=oid).with_for_update().first_or_404()
     if status in ("pending", "paid", "shipped", "delivered", "cancelled"):
+        if o.status == "cancelled" and status != "cancelled":
+            flash("Cancelled orders cannot be reopened. Ask the customer to place a new order.", "warning")
+            return redirect(url_for("admin.orders"))
+        if status == "cancelled" and o.status != "cancelled":
+            restore_order_stock(o)          # give the reserved stock back
+        if status == "paid" and o.payment_status != "paid":
+            o.payment_status = "manual"     # marked paid by hand (e.g. bank transfer / cash)
+        current_app.logger.info("AUDIT order %s: %s -> %s by admin %s", o.reference, o.status, status, current_user.email)
+        audit_log("order_status_change", "order", o.id, {"reference": o.reference, "from": o.status, "to": status})
         o.status = status
         db.session.commit()
         flash(f"Order marked {status}.", "success")
@@ -228,8 +245,9 @@ def order_status(oid, status):
 @login_required
 @admin_required
 def messages():
-    return render_template("admin/messages.html",
-                           messages=Message.query.order_by(Message.created_at.desc()).all())
+    page = request.args.get("page", 1, type=int)
+    pagination = Message.query.order_by(Message.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/messages.html", messages=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/messages/<int:mid>/read", methods=["POST"])
@@ -251,7 +269,10 @@ def resources():
     if form.validate_on_submit():
         url = form.file_url.data or ""
         if form.file.data and form.file.data.filename:
-            url = "/static/" + save_upload(form.file.data, "lib_", preset="resource")
+            saved = save_upload(form.file.data, "lib_", kind="document")
+            if saved is None:                       # rejected (reason already flashed)
+                return redirect(url_for("admin.resources"))
+            url = saved if saved.startswith(("http://", "https://")) else "/static/" + saved
         r = Resource(title=form.title.data, slug=slugify(form.title.data),
                      description=form.description.data, category=form.category.data,
                      file_url=url)
@@ -259,9 +280,9 @@ def resources():
         db.session.commit()
         flash("Resource added.", "success")
         return redirect(url_for("admin.resources"))
-    return render_template("admin/resources.html",
-                           resources=Resource.query.order_by(Resource.created_at.desc()).all(),
-                           form=form)
+    page = request.args.get("page", 1, type=int)
+    pagination = Resource.query.order_by(Resource.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/resources.html", resources=pagination.items, pagination=pagination, form=form)
 
 
 # --- DONATIONS ---
@@ -269,16 +290,18 @@ def resources():
 @login_required
 @admin_required
 def donations():
-    return render_template("admin/donations.html",
-                           donations=Donation.query.order_by(Donation.created_at.desc()).all())
+    page = request.args.get("page", 1, type=int)
+    pagination = Donation.query.order_by(Donation.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/donations.html", donations=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/donations/<int:did>/verify", methods=["POST"])
 @login_required
 @admin_required
 def donation_verify(did):
-    d = Donation.query.get_or_404(did)
+    d = Donation.query.filter_by(id=did).with_for_update().first_or_404()
     d.verified = True
+    audit_log("donation_verified", "donation", d.id, {"amount": str(d.amount), "currency": d.currency})
     db.session.commit()
     return redirect(url_for("admin.donations"))
 
@@ -289,7 +312,9 @@ def donation_verify(did):
 @admin_required
 def news():
     posts = Post.query.order_by(Post.published_at.desc()).all()
-    return render_template("admin/news.html", posts=posts)
+    page = request.args.get("page", 1, type=int)
+    pagination = Post.query.order_by(Post.published_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/news.html", posts=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/news/new", methods=["GET", "POST"])
@@ -343,8 +368,9 @@ def news_delete(pid):
 @login_required
 @admin_required
 def videos():
-    vids = VideoTestimonial.query.order_by(VideoTestimonial.created_at.desc()).all()
-    return render_template("admin/videos.html", videos=vids)
+    page = request.args.get("page", 1, type=int)
+    pagination = VideoTestimonial.query.order_by(VideoTestimonial.created_at.desc()).paginate(page=page, per_page=25, error_out=False)
+    return render_template("admin/videos.html", videos=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/videos/new", methods=["GET", "POST"])

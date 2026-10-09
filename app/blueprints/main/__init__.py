@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from ...models import Post, Program, Message
 from ...forms import ContactForm
-from ...extensions import db
+from ...extensions import db, rate_limit
 from ...models import Post, Program, Message, User, Application, Order, Donation, Product, Resource
 
 
@@ -18,9 +18,10 @@ def index():
 def about(): return render_template("main/about.html")
 
 @main_bp.route("/news")
-def news(): return render_template("main/news.html", posts=Post.query.order_by(Post.published_at.desc()).all())
+def news(): return render_template("main/news.html", posts=Post.query.order_by(Post.published_at.desc()).limit(200).all())
 
 @main_bp.route("/contact", methods=["GET", "POST"])
+@rate_limit("10 per hour", methods=["POST"])
 def contact():
     form = ContactForm()
     if form.validate_on_submit():
@@ -49,7 +50,7 @@ def impact():
         "products":  Product.query.count(),
         "orders":    Order.query.count(),
         "donations_total": float(
-            db.session.query(func.coalesce(func.sum(Donation.amount), 0)).scalar()
+            db.session.query(func.coalesce(func.sum(Donation.amount), 0)).filter(Donation.verified.is_(True)).scalar()
         ),
     }
     return render_template("main/impact.html", stats=stats, site=site)

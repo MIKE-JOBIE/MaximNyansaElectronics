@@ -20,8 +20,15 @@ try:
     from flask_limiter.util import get_remote_address
     limiter = Limiter(
         key_func=get_remote_address,
-        default_limits=["300 per hour"],
-        storage_uri="memory://",
+        default_limits=["1000 per hour", "120 per minute"],
+        # storage comes from config RATELIMIT_STORAGE_URI (use Redis in production)
     )
 except ImportError:
     limiter = None
+
+
+def rate_limit(rule, **kwargs):
+    """Decorator: apply a Flask-Limiter rule, or do nothing if the library is missing."""
+    def deco(fn):
+        return limiter.limit(rule, **kwargs)(fn) if limiter else fn
+    return deco

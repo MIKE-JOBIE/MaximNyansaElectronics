@@ -3,13 +3,13 @@
 <div class="admin-header"><h1>{{ 'Edit Program' if program else 'New Program' }}</h1></div>
 <form method="POST" enctype="multipart/form-data" class="mn-form" style="margin-top:0">
   {{ form.hidden_tag() }}
-  <label>Title</label>{{ form.title() }}
-  <label>Summary</label>{{ form.summary() }}
-  <label>Description</label>{{ form.description() }}
-  <label>Capacity</label>{{ form.capacity() }}
-  <label>Fee</label>{{ form.fee() }}
-  <label>Status</label>{{ form.status() }}
-  <label>Cover Image</label>{{ form.cover_image() }}
+  {{ form.title.label }}{{ form.title() }}
+  {{ form.summary.label }}{{ form.summary() }}
+  {{ form.description.label }}{{ form.description() }}
+  {{ form.capacity.label }}{{ form.capacity() }}
+  {{ form.fee.label }}{{ form.fee() }}
+  {{ form.status.label }}{{ form.status() }}
+  {{ form.cover_image.label }}{{ form.cover_image() }}
   <div style="margin-top:1rem">{{ form.submit(class="btn-mn-primary") }}</div>
 </form>
 {% endblock %}

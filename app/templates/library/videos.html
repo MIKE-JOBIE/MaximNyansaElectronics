@@ -32,21 +32,21 @@
 </style>
 {% endblock %}
 
-{% macro video_embed(url) %}
+{% macro video_embed(url, title="Video") %}
   {% if 'youtube.com/watch' in url %}
     {% set yt_id = url.split('v=')[1].split('&')[0] %}
     <iframe src="https://www.youtube.com/embed/{{ yt_id }}"
-            allowfullscreen loading="lazy" title="Video"></iframe>
+            allowfullscreen loading="lazy" title="{{ title }}"></iframe>
   {% elif 'youtu.be/' in url %}
     {% set yt_id = url.split('youtu.be/')[1].split('?')[0] %}
     <iframe src="https://www.youtube.com/embed/{{ yt_id }}"
-            allowfullscreen loading="lazy" title="Video"></iframe>
+            allowfullscreen loading="lazy" title="{{ title }}"></iframe>
   {% elif 'youtube.com/embed/' in url %}
-    <iframe src="{{ url }}" allowfullscreen loading="lazy" title="Video"></iframe>
+    <iframe src="{{ url }}" allowfullscreen loading="lazy" title="{{ title }}"></iframe>
   {% elif 'vimeo.com/' in url %}
     {% set vimeo_id = url.rstrip('/').split('/')[-1].split('?')[0] %}
     <iframe src="https://player.vimeo.com/video/{{ vimeo_id }}"
-            allowfullscreen loading="lazy" title="Video"></iframe>
+            allowfullscreen loading="lazy" title="{{ title }}"></iframe>
   {% else %}
     <video controls preload="metadata">
       <source src="{{ url }}">
@@ -73,7 +73,7 @@
           <div class="vid-card">
             <div class="vid-frame">
               {% if v.video_url %}
-                {{ video_embed(v.video_url) }}
+                {{ video_embed(v.video_url, v.title ~ " (video)") }}
               {% endif %}
             </div>
             <div class="vid-body">

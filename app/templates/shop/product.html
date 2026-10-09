@@ -4,7 +4,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6">
-        {% if product.image %}<img src="{{ product.image | img_url }}" class="img-4x3">{% else %}<img src="{{ site_img('tools') }}" class="img-4x3">{% endif %}      </div>
+        {% if product.image %}<img src="{{ product.image | img_url }}" class="img-4x3" alt="{{ product.name }}">{% else %}<img src="{{ site_img('tools') }}" class="img-4x3" alt="{{ product.name }} (placeholder image)">{% endif %}      </div>
       <div class="col-md-6">
         <div class="section-head"><h2>{{ product.name }}</h2></div>
         <span class="badge-status badge-{{ 'approved' if product.condition=='new' else 'pending' }}">{{ product.condition }}</span>

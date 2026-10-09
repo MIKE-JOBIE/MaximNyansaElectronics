@@ -282,18 +282,5 @@
       "value": "23231950662",
       "updated_at": "2026-10-03T13:51:57.404386"
     }
-  ],
-  "messages": [],
-  "applications": [
-    {
-      "motivation": "Upskill myself and add value to my organization",
-      "education": "High School",
-      "address": "Lungi",
-      "phone": "+23231950662",
-      "status": "approved",
-      "submitted_at": "2026-09-30T10:50:17.068001",
-      "reviewed_at": "2026-10-04T07:13:47.922533",
-      "reviewer_notes": null
-    }
   ]
 }

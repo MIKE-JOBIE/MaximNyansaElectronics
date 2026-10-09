@@ -45,8 +45,8 @@ def _to_dict(model, exclude_pk=True, exclude_fks=None):
     return rows
 
 
-def export_backup(path="backup_content.json"):
-    """Dump admin-content tables to JSON."""
+def export_backup(path="backup_content.json", include_personal=False):
+    """Dump admin-content tables to JSON. Messages/applications (personal data) only if asked."""
     data = {
         "_meta": {
             "exported_at": datetime.utcnow().isoformat(),
@@ -59,11 +59,11 @@ def export_backup(path="backup_content.json"):
         "posts":              _to_dict(Post, exclude_pk=True),
         "videos":             _to_dict(VideoTestimonial, exclude_pk=True, exclude_fks=["program_id"]),
         "site_settings":      _to_dict(SiteSetting, exclude_pk=True),
-        # Messages, donations, orders, applications are user-generated —
-        # export them too if you want a full copy
-        "messages":           _to_dict(Message, exclude_pk=True),
-        "applications":       _to_dict(Application, exclude_pk=True, exclude_fks=["user_id", "program_id"]),
     }
+    if include_personal:
+        # Personal data (names/phones/addresses) - keep this file OUT of git if you use it
+        data["messages"] = _to_dict(Message, exclude_pk=True)
+        data["applications"] = _to_dict(Application, exclude_pk=True, exclude_fks=["user_id", "program_id"])
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     click.echo(f"✅ Exported to {path}")
@@ -74,8 +74,8 @@ def export_backup(path="backup_content.json"):
     click.echo(f"   Posts:           {len(data['posts'])}")
     click.echo(f"   Videos:          {len(data['videos'])}")
     click.echo(f"   Site settings:   {len(data['site_settings'])}")
-    click.echo(f"   Messages:        {len(data['messages'])}")
-    click.echo(f"   Applications:    {len(data['applications'])}")
+    click.echo(f"   Messages:        {len(data.get('messages', []))}")
+    click.echo(f"   Applications:    {len(data.get('applications', []))}")
 
 
 def _rehydrate(model, rows, fk_map=None, skip_if_exists_field=None):
@@ -167,10 +167,11 @@ def import_backup(path="backup_content.json"):
 
 def register_backup_commands(app):
     @app.cli.command("backup-export")
+    @click.option("--include-personal", is_flag=True, help="Also export messages and applications (personal data).")
     @with_appcontext
-    def cli_export():
+    def cli_export(include_personal):
         """Export admin content to backup_content.json"""
-        export_backup()
+        export_backup(include_personal=include_personal)
 
     @app.cli.command("backup-import")
     @with_appcontext

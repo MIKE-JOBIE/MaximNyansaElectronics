@@ -33,11 +33,27 @@ class Config:
     ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@maximnyansa.com")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "ChangeMe123!")
 
-class DevelopmentConfig(Config):
-    DEBUG = True
+    ENV_NAME = "development"
+    # Public site URL, used to build links in emails/payment callbacks so they
+    # can never be poisoned by a forged Host header.
+    SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
+    # Comma-separated hostnames the site answers to (production only).
+    ALLOWED_HOSTS = [h.strip().lower() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+    # Number of reverse proxies in front of the app (Render = 1).
+    TRUSTED_PROXY_COUNT = int(os.getenv("TRUSTED_PROXY_COUNT", "1"))
+    # Use Redis in production, e.g. redis://:pass@host:6379/0
+    RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+    # Currency of your Paystack account (e.g. NGN, GHS, USD); verified on every payment.
+    PAYSTACK_CURRENCY = os.getenv("PAYSTACK_CURRENCY", "").upper()
+    SEND_FILE_MAX_AGE_DEFAULT = 60 * 60 * 24 * 7  # cache static files 7 days
 
 class ProductionConfig(Config):
     DEBUG = False
+    ENV_NAME = "production"
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 280}
+    REMEMBER_COOKIE_SECURE = True
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "Lax"
 
     # Secure session cookies — HTTPS only, no JS access, strict same-site
     SESSION_COOKIE_SECURE = True
@@ -61,6 +77,8 @@ class DevelopmentConfig(Config):
     SESSION_COOKIE_SAMESITE = "Lax"
 
 class TestingConfig(Config):
+    ENV_NAME = "testing"
     TESTING = True
+    RATELIMIT_ENABLED = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False

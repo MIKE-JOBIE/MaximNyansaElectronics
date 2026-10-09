@@ -5,7 +5,7 @@
     <div class="section-head text-center"><div class="eyebrow">Updates</div><h2>News & Stories</h2></div>
     {% for p in posts %}
       <div class="mn-card" style="margin-bottom:1.5rem;padding:1.5rem">
-        {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}" style="border-radius:8px;margin-bottom:1rem;max-height:340px;object-fit:cover">{% endif %}
+        {% if p.cover_image %}<img src="{{ url_for('static', filename=p.cover_image) }}" style="border-radius:8px;margin-bottom:1rem;max-height:340px;object-fit:cover" alt="{{ p.title }}">{% endif %}
         <h3 style="font-family:'Bebas Neue';font-size:1.8rem;margin:.5rem 0">{{ p.title }}</h3>
         <div class="text-muted" style="font-size:.85rem">{{ p.published_at.strftime('%B %d, %Y') }}</div>
         <p style="margin-top:.8rem;white-space:pre-wrap">{{ p.body }}</p>

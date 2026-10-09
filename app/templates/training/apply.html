@@ -10,10 +10,10 @@
         <option value="">— Choose a program —</option>
         {% for p in programs %}<option value="{{ p.id }}" {% if selected_program==p.id %}selected{% endif %}>{{ p.title }}</option>{% endfor %}
       </select>
-      <label>Why do you want to join?</label>{{ form.motivation() }}
-      <label>Highest education</label>{{ form.education() }}
-      <label>Home address</label>{{ form.address() }}
-      <label>Phone</label>{{ form.phone() }}
+      {{ form.motivation.label }}{{ form.motivation() }}
+      {{ form.education.label }}{{ form.education() }}
+      {{ form.address.label }}{{ form.address() }}
+      {{ form.phone.label }}{{ form.phone() }}
       <div style="margin-top:1.2rem">{{ form.submit(class="btn-mn-primary", style="width:100%") }}</div>
     </form>
   </div>

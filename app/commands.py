@@ -1,8 +1,8 @@
 import click
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from flask.cli import with_appcontext
 from .extensions import db
-from .models import User, Program, Category, Product, Resource, Post
+from .models import User, Program, Category, Product, Resource, Post, Order
 from .utils import slugify
 
 
@@ -171,3 +171,26 @@ def register_commands(app):
 
         db.session.commit()
         click.echo("✅ Seed complete.")
+
+    @app.cli.command("release-stale-orders")
+    @click.option("--minutes", default=60, show_default=True, type=int, help="Cancel unpaid orders older than this many minutes.")
+    @with_appcontext
+    def release_stale_orders(minutes):
+        """Release stock reserved by abandoned unpaid orders."""
+        from .blueprints.shop import restore_order_stock
+        from flask import current_app
+        from sqlalchemy import and_
+        cutoff = datetime.utcnow() - timedelta(minutes=max(5, minutes))
+        orders = (Order.query.filter(Order.status == "pending",
+                                     Order.payment_status.in_(["unpaid", "initiated", "failed"]),
+                                     Order.created_at < cutoff)
+                  .with_for_update().all())
+        released = 0
+        for order in orders:
+            restore_order_stock(order)
+            order.status = "cancelled"
+            order.payment_status = "expired"
+            released += 1
+        db.session.commit()
+        current_app.logger.info("Released stock from %s stale orders", released)
+        click.echo(f"Released {released} stale order(s).")

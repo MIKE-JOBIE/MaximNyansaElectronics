@@ -3,7 +3,7 @@
 <section class="section">
   <div class="container" style="max-width:840px">
     <div class="section-head"><div class="eyebrow">Program</div><h2>{{ program.title }}</h2></div>
-    {% if program.cover_image %}<img src="{{ url_for('static', filename=program.cover_image) }}" class="img-fluid mb-3">{% endif %}
+    {% if program.cover_image %}<img src="{{ url_for('static', filename=program.cover_image) }}" class="img-fluid mb-3" alt="{{ program.title }}">{% endif %}
     <div class="prose">
       <p>{{ program.description }}</p>
       <p><strong>Capacity:</strong> {{ program.capacity }} • <strong>Fee:</strong> {{ program.fee }} • <strong>Status:</strong> {{ program.status }}</p>

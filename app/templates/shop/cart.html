@@ -19,7 +19,7 @@
             </form>
           </td>
           <td>Le {{ "{:,.0f}".format(it.line) }}</td>
-          <td><a href="{{ url_for('shop.cart_remove', pid=it.product.id) }}" class="btn-mn-danger btn-sm">Remove</a></td>
+          <td><form method="post" action="{{ url_for('shop.cart_remove', pid=it.product.id) }}" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" class="btn-mn-danger btn-sm">Remove</button></form></td>
         </tr>
         {% endfor %}
       </tbody>

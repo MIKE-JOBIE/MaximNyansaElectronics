@@ -1,4 +1,9 @@
+import hashlib
+import hmac
 import os
+from decimal import Decimal, ROUND_HALF_UP
+from urllib.parse import quote
+
 import requests
 from flask import current_app, url_for
 
@@ -18,6 +23,37 @@ def is_configured():
 def is_test_mode():
     """True if using test keys."""
     return os.getenv("PAYSTACK_TEST_MODE", "false").lower() == "true"
+
+
+def to_minor(amount):
+    """Convert a Decimal/float/str amount to Paystack minor units (x100) without float drift."""
+    return int((Decimal(str(amount)) * 100).to_integral_value(rounding=ROUND_HALF_UP))
+
+
+def verify_signature(raw_body, signature):
+    """Check the x-paystack-signature header (HMAC-SHA512 of the raw body)."""
+    key = _secret_key().encode()
+    if not key or not signature:
+        return False
+    expected = hmac.new(key, raw_body, hashlib.sha512).hexdigest()
+    return hmac.compare_digest(expected, signature)
+
+
+def payment_matches(data, reference, amount_minor):
+    """True only if Paystack says success AND reference, amount and currency all match."""
+    if not data or data.get("status") != "success":
+        return False
+    if data.get("reference") != reference:
+        return False
+    try:
+        if int(data.get("amount", -1)) != int(amount_minor):
+            return False
+    except (TypeError, ValueError):
+        return False
+    currency = current_app.config.get("PAYSTACK_CURRENCY")
+    if currency and str(data.get("currency", "")).upper() != currency:
+        return False
+    return True
 
 
 def initialize_transaction(email, amount_minor, reference, callback_url, metadata=None):
@@ -61,7 +97,7 @@ def verify_transaction(reference):
         return None
     try:
         r = requests.get(
-            f"{PAYSTACK_BASE}/transaction/verify/{reference}",
+            f"{PAYSTACK_BASE}/transaction/verify/{quote(str(reference), safe='')}",
             headers={"Authorization": f"Bearer {_secret_key()}"},
             timeout=15,
         )
