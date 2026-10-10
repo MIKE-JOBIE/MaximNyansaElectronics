@@ -1,0 +1,24 @@
+name: Order reservation cleanup
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release stale unpaid order reservations
+        env:
+          SITE_URL: ${{ secrets.MNE_SITE_URL }}
+          MAINTENANCE_SECRET: ${{ secrets.MNE_MAINTENANCE_SECRET }}
+        run: |
+          test -n "$SITE_URL"
+          test -n "$MAINTENANCE_SECRET"
+          curl --fail --silent --show-error --request POST \
+            --header "X-Maintenance-Secret: $MAINTENANCE_SECRET" \
+            "$SITE_URL/health/maintenance/release-stale"
+          curl --fail --silent --show-error --request POST \
+            --header "X-Maintenance-Secret: $MAINTENANCE_SECRET" \
+            "$SITE_URL/health/maintenance/process-email-queue"
