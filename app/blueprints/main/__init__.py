@@ -66,6 +66,7 @@ def health():
         db.session.execute(text("SELECT 1"))
         db_ok = True
     except Exception:
+        db.session.rollback()
         db_ok = False
     return jsonify({
         "status": "ok" if db_ok else "degraded",
