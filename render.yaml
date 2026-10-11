@@ -4,9 +4,11 @@ services:
     env: python
     plan: free
     region: frankfurt
-    buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed && (flask backup-import || echo 'Import skipped — no changes')"
+    # Never import a static backup during a deploy. Database recovery must be an
+    # explicit, reviewed operation after a fresh database backup.
+    buildCommand: "pip install -r requirements.txt && flask db upgrade && flask seed"
     startCommand: "gunicorn wsgi:app -c gunicorn.conf.py"
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
         value: production
@@ -32,6 +34,8 @@ services:
         value: "465"
       - key: MAIL_USE_TLS
         value: "False"
+      - key: MAIL_USE_SSL
+        value: "True"
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
@@ -51,14 +55,6 @@ services:
       - key: TRUSTED_PROXY_COUNT
         value: "1"
       - key: RATELIMIT_STORAGE_URI
-        sync: false          # e.g. a Render Key Value / Upstash Redis URL
+        sync: false
       - key: PAYSTACK_CURRENCY
-        sync: false          # currency of your Paystack account
-
-
-# Optional scheduled cleanup: add this cron job in Render when order volume grows.
-# - type: cron
-#   name: maxim-electronics-order-cleanup
-#   schedule: "*/15 * * * *"
-#   buildCommand: "pip install -r requirements.txt"
-#   startCommand: "flask --app wsgi release-stale-orders --minutes 60"
+        sync: false
