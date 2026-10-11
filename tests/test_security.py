@@ -109,7 +109,7 @@ def test_webhook_marks_order_paid_only_when_amount_matches(app, client, monkeypa
     verified = {wrong_order.reference: wrong["data"]}
     monkeypatch.setattr("app.blueprints.shop.verify_transaction", lambda ref: verified.get(ref))
     body, sig = _signed(wrong, "sk_test_dummy")
-    assert client.post("/shop/webhook/paystack", data=body, headers={"x-paystack-signature": sig}).status_code == 200
+    assert client.post("/shop/webhook/paystack", data=body, content_type="application/json", headers={"x-paystack-signature": sig}).status_code == 200
     db.session.refresh(wrong_order)
     assert wrong_order.payment_status == "review"  # underpayment is not accepted and is audited
 
