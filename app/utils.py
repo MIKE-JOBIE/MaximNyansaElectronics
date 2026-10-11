@@ -102,6 +102,13 @@ def save_upload(file_storage, prefix="", preset=None, kind="image"):
             flash("Media storage is temporarily unavailable. Nothing was saved.", "danger")
             return None
 
+    # Render Free uses an ephemeral filesystem. In production, fail closed rather
+    # than returning a local upload path that can disappear after restart/redeploy.
+    if current_app.config.get("ENV_NAME") == "production":
+        flash("Persistent media storage is not configured. No file was saved.", "danger")
+        current_app.logger.error("Upload rejected: Cloudinary is not configured in production")
+        return None
+
     unique = secrets.token_hex(6)
     base = filename.rsplit(".", 1)[0] if "." in filename else filename
     fname = f"{prefix}{unique}_{base}.{ext}"
