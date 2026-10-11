@@ -1,10 +1,12 @@
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from flask import (Blueprint, render_template, redirect, url_for, flash, session,
                    request, current_app, abort)
 from flask_login import login_required, current_user
 
-from ...models import Product, Category, Order, OrderItem, Donation
+from ...models import (Product, Category, Order, OrderItem, Donation,
+                        InventoryTransaction, PaymentTransaction)
 from ...forms import CheckoutForm
 from ...extensions import db, csrf
 from ...utils import gen_ref, external_url
@@ -50,15 +52,175 @@ def _cart_lines():
     return items, total
 
 
-def restore_order_stock(order):
-    """Put reserved stock back; caller must hold the order row lock."""
+def restore_order_stock(order, reason="Order reservation released"):
+    """Restore an order's reserved stock once; caller should hold the order row lock."""
+    already_released = InventoryTransaction.query.filter_by(
+        order_id=order.id, transaction_type="reservation_release"
+    ).first()
+    if already_released:
+        return 0
+
     product_ids = [it.product_id for it in order.items if it.product_id]
+    locked = {}
     if product_ids:
-        locked = {p.id: p for p in Product.query.filter(Product.id.in_(product_ids)).with_for_update().all()}
-        for it in order.items:
-            product = locked.get(it.product_id)
-            if product is not None:
-                product.stock = (product.stock or 0) + (it.qty or 0)
+        locked = {p.id: p for p in Product.query.filter(
+            Product.id.in_(product_ids)
+        ).with_for_update().all()}
+
+    restored = 0
+    for item in order.items:
+        product = locked.get(item.product_id)
+        qty = max(0, int(item.qty or 0))
+        if product is None or qty == 0:
+            continue
+        product.stock = (product.stock or 0) + qty
+        db.session.add(InventoryTransaction(
+            product_id=product.id,
+            order_id=order.id,
+            actor_user_id=None,
+            transaction_type="reservation_release",
+            quantity=qty,
+            reason=str(reason)[:255],
+        ))
+        restored += qty
+    return restored
+
+
+def release_stale_order_reservations(minutes=60, limit=100):
+    """Cancel stale unpaid orders and restore their stock in one DB transaction."""
+    cutoff = datetime.utcnow() - timedelta(minutes=max(1, int(minutes)))
+    orders = (Order.query
+              .filter(Order.status == "pending",
+                      Order.payment_status.in_(("unpaid", "initiated", "failed")),
+                      Order.created_at <= cutoff)
+              .order_by(Order.created_at.asc())
+              .with_for_update(skip_locked=True)
+              .limit(max(1, min(int(limit), 500))).all())
+    released = 0
+    for order in orders:
+        # The row lock serializes this with payment callbacks/webhooks.
+        if order.status != "pending" or order.payment_status == "paid":
+            continue
+        restore_order_stock(order, "Expired unpaid order reservation")
+        order.status = "cancelled"
+        order.payment_status = "expired"
+        released += 1
+    db.session.commit()
+    return released
+
+
+def _record_order_payment(order_id, data, event_id=None):
+    """Record a verified payment once; late payments after stock release need manual review."""
+    order = Order.query.filter_by(id=order_id).with_for_update().first()
+    if order is None:
+        return "missing"
+    if order.payment_status == "paid":
+        return "paid"
+
+    matches = payment_matches(data, order.reference, to_minor(order.total))
+    if not matches:
+        if data and data.get("status") == "success":
+            order.payment_status = "review"
+            db.session.commit()
+            return "review"
+        return "failed"
+
+    existing = PaymentTransaction.query.filter_by(
+        provider_reference=order.reference
+    ).first()
+    if existing:
+        if existing.order_id == order.id and existing.status == "success":
+            order.payment_status = "paid"
+            order.status = "paid"
+            db.session.commit()
+            return "paid"
+        order.payment_status = "review"
+        db.session.commit()
+        return "review"
+
+    if event_id:
+        duplicate_event = PaymentTransaction.query.filter_by(event_id=event_id).first()
+        if duplicate_event and duplicate_event.provider_reference != order.reference:
+            order.payment_status = "review"
+            db.session.commit()
+            return "review"
+
+    if order.status == "cancelled":
+        order.payment_status = "review"
+        db.session.add(PaymentTransaction(
+            order_id=order.id,
+            provider="paystack",
+            provider_reference=order.reference,
+            amount=(Decimal(str(data["amount"])) / Decimal("100")),
+            currency=str(data.get("currency", "")).upper()[:5],
+            status="review",
+            event_id=event_id,
+            verified_at=datetime.utcnow(),
+        ))
+        db.session.commit()
+        return "review"
+
+    db.session.add(PaymentTransaction(
+        order_id=order.id,
+        provider="paystack",
+        provider_reference=order.reference,
+        amount=(Decimal(str(data["amount"])) / Decimal("100")),
+        currency=str(data.get("currency", "")).upper()[:5],
+        status="success",
+        event_id=event_id,
+        verified_at=datetime.utcnow(),
+    ))
+    order.payment_status = "paid"
+    order.status = "paid"
+    db.session.commit()
+    return "paid"
+
+
+def _record_donation_payment(donation, data, event_id=None):
+    """Record a verified donation payment once."""
+    locked = Donation.query.filter_by(id=donation.id).with_for_update().first()
+    if locked is None:
+        return "missing"
+    if locked.payment_status == "paid":
+        return "paid"
+    matches = payment_matches(data, locked.reference, to_minor(locked.amount))
+    if not matches:
+        if data and data.get("status") == "success":
+            locked.payment_status = "review"
+            db.session.commit()
+            return "review"
+        return "failed"
+
+    existing = PaymentTransaction.query.filter_by(provider_reference=locked.reference).first()
+    if existing:
+        if existing.donation_id == locked.id and existing.status == "success":
+            locked.payment_status = "paid"
+            locked.verified = True
+            db.session.commit()
+            return "paid"
+        locked.payment_status = "review"
+        db.session.commit()
+        return "review"
+
+    if event_id and PaymentTransaction.query.filter_by(event_id=event_id).first():
+        locked.payment_status = "review"
+        db.session.commit()
+        return "review"
+
+    db.session.add(PaymentTransaction(
+        donation_id=locked.id,
+        provider="paystack",
+        provider_reference=locked.reference,
+        amount=(Decimal(str(data["amount"])) / Decimal("100")),
+        currency=str(data.get("currency", "")).upper()[:5],
+        status="success",
+        event_id=event_id,
+        verified_at=datetime.utcnow(),
+    ))
+    locked.payment_status = "paid"
+    locked.verified = True
+    db.session.commit()
+    return "paid"
 
 
 @shop_bp.route("/")
@@ -178,7 +340,15 @@ def checkout():
         for it in items:
             p = locked[it["product"].id]
             db.session.add(OrderItem(order_id=order.id, product_id=p.id, qty=it["qty"], unit_price=p.price))
-            p.stock -= it["qty"]          # reserved; restored if the order is cancelled
+            p.stock -= it["qty"]
+            db.session.add(InventoryTransaction(
+                product_id=p.id,
+                order_id=order.id,
+                actor_user_id=current_user.id,
+                transaction_type="reservation",
+                quantity=-int(it["qty"]),
+                reason="Stock reserved for checkout",
+            ))
         db.session.commit()
         session["cart"] = {}
         session.modified = True
@@ -261,57 +431,65 @@ def pay(ref):
 @shop_bp.route("/pay/callback/<ref>")
 @login_required
 def pay_callback(ref):
-    o = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
-    if o.payment_status == "paid":
-        return redirect(url_for("shop.order_detail", ref=o.reference))
-    if o.status == "cancelled":
-        flash("This order was cancelled and cannot be paid.", "warning")
-        return redirect(url_for("shop.order_detail", ref=o.reference))
+    order = Order.query.filter_by(reference=ref, user_id=current_user.id).first_or_404()
     data = verify_transaction(ref)
-    if payment_matches(data, o.reference, to_minor(o.total)):
-        o.payment_status = "paid"
-        o.status = "paid"
-        db.session.commit()
-        flash(f"Payment received! Order {o.reference} confirmed.", "success")
-    elif data and data.get("status") == "success":
-        # Paid, but amount/currency do not match the order: needs a human to look at it
-        current_app.logger.error("Payment mismatch for order %s: %s", o.reference,
-                                 {k: data.get(k) for k in ("amount", "currency", "reference")})
-        o.payment_status = "review"
-        db.session.commit()
-        flash("We received a payment that does not match this order. Our team will contact you.", "warning")
+    if not data:
+        flash("Payment status could not be verified yet. Please refresh your order later.", "warning")
+        return redirect(url_for("shop.order_detail", ref=order.reference))
+
+    if data.get("status") == "success":
+        result = _record_order_payment(order.id, data)
+        if result == "paid":
+            flash(f"Payment received! Order {order.reference} confirmed.", "success")
+        elif result == "review":
+            current_app.logger.error("Payment for order %s requires manual review", order.reference)
+            flash("Payment needs manual review. Please contact our team before paying again.", "warning")
+        else:
+            flash("Payment details did not match this order. Please contact our team.", "warning")
     else:
-        o.payment_status = "failed"
-        db.session.commit()
-        flash("Payment failed or was cancelled. Your reserved stock remains available for a new order after the reservation is released.", "warning")
-    return redirect(url_for("shop.order_detail", ref=o.reference))
+        locked = Order.query.filter_by(id=order.id).with_for_update().first()
+        if locked and locked.payment_status != "paid" and locked.status != "cancelled":
+            locked.payment_status = "failed"
+            db.session.commit()
+        flash("Payment was not completed. Your reservation will expire automatically if unpaid.", "warning")
+    return redirect(url_for("shop.order_detail", ref=order.reference))
 
 
 @shop_bp.route("/webhook/paystack", methods=["POST"])
 @csrf.exempt
 def paystack_webhook():
-    """
-    Paystack server-to-server notification. Marks orders/donations paid even if the
-    customer closed their browser before returning. Set this URL in the Paystack dashboard:
-    https://<your-site>/shop/webhook/paystack
-    """
+    """Verify signed Paystack events against Paystack's transaction verification API."""
     if not verify_signature(request.get_data(), request.headers.get("x-paystack-signature", "")):
         abort(401)
     event = request.get_json(silent=True) or {}
-    if event.get("event") == "charge.success":
-        data = event.get("data") or {}
-        ref = str(data.get("reference", ""))
-        order = Order.query.filter_by(reference=ref).first()
-        if order is not None:
-            if order.status != "cancelled" and order.payment_status != "paid" and payment_matches(data, ref, to_minor(order.total)):
-                order.payment_status = "paid"
-                order.status = "paid"
-                db.session.commit()
-        else:
-            donation = Donation.query.filter_by(reference=ref).first()
-            if donation is not None and donation.payment_status != "paid" \
-                    and payment_matches(data, ref, to_minor(donation.amount)):
-                donation.payment_status = "paid"
-                donation.verified = True
-                db.session.commit()
+    if event.get("event") != "charge.success":
+        return "", 200
+
+    event_data = event.get("data") or {}
+    ref = str(event_data.get("reference", "")).strip()
+    if not ref:
+        return "", 400
+
+    # Verify with Paystack's API instead of trusting the webhook payload alone.
+    verified = verify_transaction(ref)
+    if not verified:
+        current_app.logger.warning("Paystack verification temporarily unavailable for reference %s", ref)
+        return "", 503
+
+    event_id = str(event.get("id")) if event.get("id") is not None else None
+    order = Order.query.filter_by(reference=ref).first()
+    if order is not None:
+        result = _record_order_payment(order.id, verified, event_id=event_id)
+        if result == "review":
+            current_app.logger.error("Paystack order payment requires review: %s", ref)
+        return "", 200
+
+    donation = Donation.query.filter_by(reference=ref).first()
+    if donation is not None:
+        result = _record_donation_payment(donation, verified, event_id=event_id)
+        if result == "review":
+            current_app.logger.error("Paystack donation payment requires review: %s", ref)
+        return "", 200
+
+    current_app.logger.warning("Verified Paystack payment has no matching order/donation: %s", ref)
     return "", 200
