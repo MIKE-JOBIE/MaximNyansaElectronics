@@ -69,6 +69,18 @@ Required settings (values are configured in Render's environment UI; never commi
 
 Keep `PAYSTACK_TEST_MODE=true` until a controlled test transaction is verified. Do not enable live payments until amount, currency, reference, callback, webhook, refund/manual-review procedures, and order inventory behavior have been tested end-to-end.
 
+## Creating a local production database backup
+
+Install PostgreSQL client tools so `pg_dump` and `pg_restore` are available in PowerShell. Set `$env:DATABASE_URL` to the **direct** PostgreSQL/Neon connection URL for the database you intend to back up, then run:
+
+```powershell
+$env:DATABASE_URL = Read-Host "Paste the direct PostgreSQL connection URL"
+.\scripts\backup-postgres.ps1
+Remove-Item Env:DATABASE_URL
+```
+
+The script asks for explicit confirmation, stores the dump under the ignored local `backups/` folder, prints a SHA-256 checksum, and checks that the archive can be listed. It never commits or uploads the backup. A readable archive is not proof of recoverability: restore it into a separate test database and verify row counts and application behavior before merging a production schema change.
+
 ## Database and deployment safety
 
 - Normal builds run migrations and idempotent seed logic only.
