@@ -1,33 +1,28 @@
 name: Order reservation cleanup and email queue
 
 on:
-  # Keep manual-only until MNE_SITE_URL and MNE_MAINTENANCE_SECRET are configured
-  # and the production recovery/maintenance endpoints have been verified.
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 jobs:
   maintenance:
     runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ secrets.MNE_SITE_URL }}
+      MAINTENANCE_SECRET: ${{ secrets.MNE_MAINTENANCE_SECRET }}
     steps:
-      - name: Validate required secrets
-        env:
-          SITE_URL: ${{ secrets.MNE_SITE_URL }}
-          MAINTENANCE_SECRET: ${{ secrets.MNE_MAINTENANCE_SECRET }}
-        run: |
-          test -n "$SITE_URL"
-          test -n "$MAINTENANCE_SECRET"
+      - name: Explain skipped maintenance when secrets are not configured
+        if: ${{ env.SITE_URL == '' || env.MAINTENANCE_SECRET == '' }}
+        run: echo "Maintenance skipped safely. Configure MNE_SITE_URL and MNE_MAINTENANCE_SECRET to enable it."
       - name: Release stale unpaid order reservations
-        env:
-          SITE_URL: ${{ secrets.MNE_SITE_URL }}
-          MAINTENANCE_SECRET: ${{ secrets.MNE_MAINTENANCE_SECRET }}
+        if: ${{ env.SITE_URL != '' && env.MAINTENANCE_SECRET != '' }}
         run: |
           curl --fail --silent --show-error --request POST \
             --header "X-Maintenance-Secret: $MAINTENANCE_SECRET" \
             "$SITE_URL/health/maintenance/release-stale"
       - name: Process queued email jobs
-        env:
-          SITE_URL: ${{ secrets.MNE_SITE_URL }}
-          MAINTENANCE_SECRET: ${{ secrets.MNE_MAINTENANCE_SECRET }}
+        if: ${{ env.SITE_URL != '' && env.MAINTENANCE_SECRET != '' }}
         run: |
           curl --fail --silent --show-error --request POST \
             --header "X-Maintenance-Secret: $MAINTENANCE_SECRET" \
