@@ -18,11 +18,26 @@ def _validate_production(app):
         problems.append("SECRET_KEY must be a random string of at least 32 characters")
     if str(app.config.get("SQLALCHEMY_DATABASE_URI", "")).startswith("sqlite"):
         problems.append("DATABASE_URL must point to PostgreSQL (SQLite on a server loses data)")
+    if app.config.get("MAIL_USE_SSL") and app.config.get("MAIL_USE_TLS"):
+        problems.append("Configure only one SMTP transport mode: MAIL_USE_SSL or MAIL_USE_TLS")
     if problems:
         raise RuntimeError("Unsafe production configuration: " + "; ".join(problems))
+
     admin_pw = app.config.get("ADMIN_PASSWORD", "") or ""
     if admin_pw in ("", "ChangeMe123!") or len(admin_pw) < 12:
         app.logger.warning("ADMIN_PASSWORD is weak or default - set a strong one before running `flask seed`.")
+    if not app.config.get("ALLOWED_HOSTS"):
+        app.logger.warning("ALLOWED_HOSTS is empty; host-header allow-list protection is disabled.")
+    if app.config.get("RATELIMIT_STORAGE_URI", "memory://").startswith("memory://"):
+        app.logger.warning("Rate limits use process-local memory; configure shared Redis/Valkey for production.")
+    if not all(os.getenv(name) for name in (
+        "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"
+    )):
+        app.logger.warning("Cloudinary is not configured; production media uploads will be rejected.")
+    if os.getenv("PAYSTACK_SECRET_KEY") and not app.config.get("PAYSTACK_CURRENCY"):
+        app.logger.warning("Paystack is configured without PAYSTACK_CURRENCY; payments will fail closed.")
+    if not app.config.get("MAIL_USERNAME"):
+        app.logger.warning("MAIL_USERNAME is missing; email jobs can queue but cannot be delivered.")
 
 
 def create_app(config_object=None):
