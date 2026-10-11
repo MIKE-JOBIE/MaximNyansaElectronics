@@ -1,7 +1,9 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+import hmac
+
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify, abort
 from ...models import Post, Program, Message
 from ...forms import ContactForm
-from ...extensions import db, rate_limit
+from ...extensions import db, rate_limit, csrf
 from ...models import Post, Program, Message, User, Application, Order, Donation, Product, Resource
 
 
@@ -120,3 +122,45 @@ def favicon():
 @main_bp.route("/developer")
 def developer():
     return render_template("main/developer.html")
+
+def _maintenance_authorized():
+    expected = (current_app.config.get("MAINTENANCE_SECRET") or "").strip()
+    supplied = (request.headers.get("X-Maintenance-Secret") or "").strip()
+    return bool(expected and supplied and hmac.compare_digest(expected, supplied))
+
+
+@main_bp.route("/health/maintenance/release-stale", methods=["POST"])
+@csrf.exempt
+def maintenance_release_stale():
+    """Protected maintenance endpoint; never enabled until a secret is configured."""
+    if not current_app.config.get("MAINTENANCE_SECRET"):
+        return jsonify({"error": "maintenance_disabled"}), 503
+    if not _maintenance_authorized():
+        abort(401)
+    from ...blueprints.shop import release_stale_order_reservations
+    try:
+        released = release_stale_order_reservations(minutes=60, limit=100)
+        return jsonify({"released_orders": released}), 200
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Stale order reservation cleanup failed")
+        return jsonify({"error": "maintenance_failed"}), 500
+
+
+@main_bp.route("/health/maintenance/process-email-queue", methods=["POST"])
+@csrf.exempt
+def maintenance_process_email_queue():
+    """Process a small, bounded batch of durable email jobs."""
+    if not current_app.config.get("MAINTENANCE_SECRET"):
+        return jsonify({"error": "maintenance_disabled"}), 503
+    if not _maintenance_authorized():
+        abort(401)
+    from ...email_utils import process_email_queue
+    try:
+        result = process_email_queue(limit=10)
+        return jsonify(result), (503 if result.get("paused") else 200)
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Email queue processing failed")
+        return jsonify({"error": "maintenance_failed"}), 500
+
