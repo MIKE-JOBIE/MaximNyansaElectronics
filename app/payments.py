@@ -51,7 +51,11 @@ def payment_matches(data, reference, amount_minor):
     except (TypeError, ValueError):
         return False
     currency = current_app.config.get("PAYSTACK_CURRENCY")
-    if currency and str(data.get("currency", "")).upper() != currency:
+    if not currency:
+        # In production, never accept a payment when the account currency is unknown.
+        if current_app.config.get("ENV_NAME") == "production":
+            return False
+    elif str(data.get("currency", "")).upper() != currency:
         return False
     return True
 
