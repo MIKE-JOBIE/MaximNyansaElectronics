@@ -6,12 +6,20 @@ $pgRestore = Get-Command pg_restore -ErrorAction SilentlyContinue
 if (-not $pgDump -or -not $pgRestore) {
     throw "PostgreSQL command-line tools are required. Install PostgreSQL client tools and ensure pg_dump/pg_restore are on PATH."
 }
-if ([string]::IsNullOrWhiteSpace($env:DATABASE_URL)) {
-    throw "Set DATABASE_URL in this PowerShell session to the DIRECT PostgreSQL connection URL. Do not put it in a committed file."
-}
+$connectionString = $env:DATABASE_URL
+$urlPointer = [IntPtr]::Zero
 
 try {
-    $uri = [System.Uri]$env:DATABASE_URL
+    if ([string]::IsNullOrWhiteSpace($connectionString)) {
+        $secureUrl = Read-Host "Enter the DIRECT PostgreSQL connection URL (input is hidden)" -AsSecureString
+        $urlPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureUrl)
+        $connectionString = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($urlPointer)
+    }
+    if ([string]::IsNullOrWhiteSpace($connectionString)) {
+        throw "No DATABASE_URL supplied."
+    }
+
+    $uri = [System.Uri]$connectionString
     $userInfo = [System.Uri]::UnescapeDataString($uri.UserInfo)
     $separator = $userInfo.IndexOf(":")
     if ($separator -lt 1) { throw "DATABASE_URL must include a username and password." }
@@ -58,6 +66,10 @@ try {
     Write-Warning "This verifies archive readability, not a full restore. Restore it into a SEPARATE test database before a production deployment."
 }
 finally {
+    if ($urlPointer -ne [IntPtr]::Zero) {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($urlPointer)
+    }
+    $connectionString = $null
     Remove-Item Env:PGHOST -ErrorAction SilentlyContinue
     Remove-Item Env:PGPORT -ErrorAction SilentlyContinue
     Remove-Item Env:PGUSER -ErrorAction SilentlyContinue
