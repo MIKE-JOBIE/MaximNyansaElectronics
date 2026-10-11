@@ -224,3 +224,48 @@ class AuditLog(db.Model):
     user_agent = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
     user       = db.relationship("User", backref="audit_logs")
+
+class PaymentTransaction(db.Model):
+    """Immutable audit record for a verified payment-provider transaction."""
+    __tablename__ = "payment_transactions"
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id", ondelete="SET NULL"), nullable=True, index=True)
+    donation_id = db.Column(db.Integer, db.ForeignKey("donations.id", ondelete="SET NULL"), nullable=True, index=True)
+    provider = db.Column(db.String(40), nullable=False, default="paystack", server_default="paystack")
+    provider_reference = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    amount = db.Column(db.Numeric(12, 2), nullable=False)
+    currency = db.Column(db.String(5), nullable=False)
+    status = db.Column(db.String(30), nullable=False, default="success", server_default="success")
+    event_id = db.Column(db.String(160), nullable=True, unique=True)
+    verified_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class InventoryTransaction(db.Model):
+    """Inventory ledger; quantity is a signed stock change (outflow negative, inflow positive)."""
+    __tablename__ = "inventory_transactions"
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id", ondelete="RESTRICT"), nullable=False, index=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id", ondelete="SET NULL"), nullable=True, index=True)
+    actor_user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    transaction_type = db.Column(db.String(30), nullable=False, index=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    reason = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+
+
+class EmailJob(db.Model):
+    """Durable email queue row. Message bodies contain personal/reset-token data; restrict DB access."""
+    __tablename__ = "email_jobs"
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(255), nullable=False)
+    recipients = db.Column(db.Text, nullable=False)
+    html_body = db.Column(db.Text, nullable=False)
+    text_body = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default="queued", server_default="queued", index=True)
+    attempts = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    available_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    last_error = db.Column(db.String(1000), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    sent_at = db.Column(db.DateTime, nullable=True)
+
