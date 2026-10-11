@@ -497,7 +497,9 @@ def paystack_webhook():
     """Verify signed Paystack events against Paystack's transaction verification API."""
     if not verify_signature(request.get_data(), request.headers.get("x-paystack-signature", "")):
         abort(401)
-    event = request.get_json(silent=True) or {}
+    event = request.get_json(silent=True)
+    if not isinstance(event, dict):
+        return "", 400
     if event.get("event") != "charge.success":
         return "", 200
 
