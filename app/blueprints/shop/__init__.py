@@ -54,6 +54,8 @@ def _cart_lines():
 
 def restore_order_stock(order, reason="Order reservation released"):
     """Restore an order's reserved stock once; caller should hold the order row lock."""
+    if order.status == "paid":
+        return 0
     already_released = InventoryTransaction.query.filter_by(
         order_id=order.id, transaction_type="reservation_release"
     ).first()
@@ -120,6 +122,24 @@ def _record_order_payment(order_id, data, event_id=None):
     matches = payment_matches(data, order.reference, to_minor(order.total))
     if not matches:
         if data and data.get("status") == "success":
+            existing_review = PaymentTransaction.query.filter_by(
+                provider_reference=order.reference
+            ).first()
+            if not existing_review and data.get("reference") == order.reference:
+                try:
+                    db.session.add(PaymentTransaction(
+                        order_id=order.id,
+                        provider="paystack",
+                        provider_reference=order.reference,
+                        amount=(Decimal(str(data["amount"])) / Decimal("100")),
+                        currency=str(data.get("currency", "")).upper()[:5],
+                        status="review",
+                        verified_at=datetime.utcnow(),
+                    ))
+                except Exception:
+                    db.session.rollback()
+                    current_app.logger.exception("Could not record payment review for order %s", order.reference)
+                    return "review"
             order.payment_status = "review"
             db.session.commit()
             return "review"
@@ -186,6 +206,19 @@ def _record_donation_payment(donation, data, event_id=None):
     matches = payment_matches(data, locked.reference, to_minor(locked.amount))
     if not matches:
         if data and data.get("status") == "success":
+            existing_review = PaymentTransaction.query.filter_by(
+                provider_reference=locked.reference
+            ).first()
+            if not existing_review and data.get("reference") == locked.reference:
+                db.session.add(PaymentTransaction(
+                    donation_id=locked.id,
+                    provider="paystack",
+                    provider_reference=locked.reference,
+                    amount=(Decimal(str(data["amount"])) / Decimal("100")),
+                    currency=str(data.get("currency", "")).upper()[:5],
+                    status="review",
+                    verified_at=datetime.utcnow(),
+                ))
             locked.payment_status = "review"
             db.session.commit()
             return "review"
