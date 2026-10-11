@@ -254,7 +254,7 @@ def order_status(oid, status):
             flash("Cancelled orders cannot be reopened. Ask the customer to place a new order.", "warning")
             return redirect(url_for("admin.orders"))
         if status == "cancelled" and o.status != "cancelled":
-            if o.payment_status in ("paid", "manual") or o.status in ("paid", "shipped", "delivered"):
+            if o.payment_status in ("paid", "manual", "review") or o.status in ("paid", "shipped", "delivered"):
                 flash("Paid or fulfilled orders require a separate refund/return review; they cannot be cancelled here.", "warning")
                 return redirect(url_for("admin.orders"))
             restore_order_stock(
