@@ -388,6 +388,9 @@ def pay(ref):
     if o.payment_status == "paid":
         flash("This order is already paid.", "info")
         return redirect(url_for("shop.order_detail", ref=o.reference))
+    if o.payment_status == "review":
+        flash("This payment needs manual review. Please contact our team before trying again.", "warning")
+        return redirect(url_for("shop.order_detail", ref=o.reference))
     if o.status == "cancelled":
         flash("This order was cancelled. Please place a new order.", "warning")
         return redirect(url_for("shop.order_detail", ref=o.reference))
