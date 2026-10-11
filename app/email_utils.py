@@ -21,13 +21,13 @@ def send_email(subject, recipients, html_body, text_body=None):
     """Send one email synchronously. Development without SMTP prints a preview only."""
     if not current_app.config.get("MAIL_USERNAME"):
         if current_app.debug or current_app.testing:
-            print("\\n" + "=" * 70)
+            print("\n" + "=" * 70)
             print("EMAIL (dev mode - not actually sent)")
             print(f"To:      {recipients}")
             print(f"Subject: {subject}")
             print("-" * 70)
             print(text_body or html_body)
-            print("=" * 70 + "\\n")
+            print("=" * 70 + "\n")
             return True
         current_app.logger.warning("Email not sent: MAIL_USERNAME is not configured (subject=%r)", subject)
         return False
