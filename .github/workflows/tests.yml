@@ -23,4 +23,4 @@ jobs:
           FLASK_ENV: testing
           SECRET_KEY: ci-test-only-secret-key-not-for-production-000000
           DATABASE_URL: sqlite:///ci.db
-        run: pytest -q
+        run: python -m pytest -q
