@@ -60,8 +60,11 @@ def register_bulk_routes(bp):
 </div>"""
                 messages.append((subject, [u.email], html, text))
 
-            send_many_async(messages)      # sent in the background; the page returns at once
-            flash(f"Queued {len(messages)} email(s) for sending.", "success")
+            queued = send_many_async(messages)
+            if queued:
+                flash(f"Accepted {len(messages)} email(s) for processing.", "success")
+            else:
+                flash("Email jobs could not be queued. Please check the application logs and try again.", "danger")
             return redirect(url_for("admin.bulk_email"))
 
         return render_template("admin/bulk_email.html", form=form)
