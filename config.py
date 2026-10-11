@@ -43,6 +43,7 @@ class Config:
     ALLOWED_HOSTS = [h.strip().lower() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
     TRUSTED_PROXY_COUNT = int(os.getenv("TRUSTED_PROXY_COUNT", "1"))
     RATELIMIT_STORAGE_URI = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
+    MAINTENANCE_SECRET = os.getenv("MAINTENANCE_SECRET", "")
     PAYSTACK_CURRENCY = os.getenv("PAYSTACK_CURRENCY", "").upper()
     SEND_FILE_MAX_AGE_DEFAULT = 60 * 60 * 24 * 7
 
