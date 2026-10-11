@@ -76,7 +76,7 @@ Keep `PAYSTACK_TEST_MODE=true` until a controlled test transaction is verified. 
 - Take a fresh database backup before merging any schema change. Verify restore to a separate test database before calling the backup recoverable.
 - Migrations are forward-only in production unless a tested rollback plan explicitly says otherwise. Never drop production tables to fix a migration.
 - The `/health` endpoint checks database connectivity and is used for the Render health check.
-- Stale unpaid order cleanup and email queue processing are protected by `MAINTENANCE_SECRET`. The GitHub Actions workflow is manual-only until its secrets are configured and the endpoints are verified. Add GitHub repository secrets `MNE_SITE_URL` and `MNE_MAINTENANCE_SECRET`, matching the deployed site URL and Render's maintenance secret, before running the workflow.
+- Stale unpaid order cleanup and email queue processing are protected by `MAINTENANCE_SECRET`. The GitHub Actions workflow runs every 15 minutes but safely skips maintenance until its secrets are configured. Add repository secrets `MNE_SITE_URL` and `MNE_MAINTENANCE_SECRET`, matching the deployed site URL and Render's maintenance secret. Verify the endpoints manually before relying on automated cleanup.
 - The email queue stores reset links and recipient details in the database. Restrict database access and avoid logging email bodies or reset URLs.
 
 ## Current hardening behavior
