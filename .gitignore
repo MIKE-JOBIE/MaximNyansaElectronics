@@ -10,3 +10,4 @@ app/static/uploads/*
 .pytest_cache/
 test_smtp.py
 app/test_smtp.py
+backups/

@@ -37,6 +37,9 @@ def pay(ref):
     if d.payment_status == "paid":
         flash("This donation has already been received. Thank you!", "info")
         return redirect(url_for("donors.index"))
+    if d.payment_status == "review":
+        flash("This donation payment needs manual review. Please contact our team.", "warning")
+        return redirect(url_for("donors.index"))
     if not paystack_ready():
         flash("Online donations not yet enabled. We'll contact you.", "info")
         return redirect(url_for("donors.index"))
@@ -59,22 +62,28 @@ def pay(ref):
 @donors_bp.route("/pay/callback/<ref>")
 @rate_limit("30 per hour")
 def pay_callback(ref):
-    d = Donation.query.filter_by(reference=ref).first_or_404()
-    if d.payment_status == "paid":
+    donation = Donation.query.filter_by(reference=ref).first_or_404()
+    if donation.payment_status == "paid":
         return redirect(url_for("donors.index"))
-    data = verify_transaction(d.reference)
-    if payment_matches(data, d.reference, to_minor(d.amount)):
-        d.payment_status = "paid"
-        d.verified = True
-        db.session.commit()
-        flash("Thank you! Your donation was received.", "success")
-    elif data and data.get("status") == "success":
-        current_app.logger.error("Donation payment mismatch for %s", d.reference)
-        d.payment_status = "review"
-        db.session.commit()
-        flash("We received your payment and will confirm the details with you shortly.", "info")
+
+    data = verify_transaction(donation.reference)
+    if not data:
+        flash("Payment status could not be verified yet. Please refresh later.", "warning")
+        return redirect(url_for("donors.index"))
+
+    if data.get("status") == "success":
+        from ...blueprints.shop import _record_donation_payment
+        result = _record_donation_payment(donation, data)
+        if result == "paid":
+            flash("Thank you! Your donation was received.", "success")
+        elif result == "review":
+            current_app.logger.error("Donation payment requires manual review: %s", donation.reference)
+            flash("We received your payment and will confirm the details with you shortly.", "info")
+        else:
+            flash("Payment details did not match. Please contact our team.", "warning")
     else:
-        d.payment_status = "failed"
-        db.session.commit()
-        flash("Payment failed.", "warning")
+        if donation.payment_status != "paid":
+            donation.payment_status = "failed"
+            db.session.commit()
+        flash("Payment was not completed.", "warning")
     return redirect(url_for("donors.index"))

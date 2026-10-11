@@ -5,7 +5,8 @@ from flask_login import login_required, current_user
 from io import BytesIO
 
 from ...models import (User, Program, Application, Product, Category,
-                       Order, Resource, Donation, Message, Post, VideoTestimonial)
+                       Order, Resource, Donation, Message, Post, VideoTestimonial,
+                       InventoryTransaction)
 from ...forms import ProgramForm, ProductForm, ResourceForm, PostForm, VideoForm
 from ...extensions import db
 from ...utils import slugify, save_upload, audit_log
@@ -176,6 +177,17 @@ def product_new():
                     category_id=form.category_id.data, image=img,
                     is_active=(form.is_active.data == "yes"))
         db.session.add(p)
+        db.session.flush()
+        initial_stock = max(0, int(p.stock or 0))
+        if initial_stock:
+            db.session.add(InventoryTransaction(
+                product_id=p.id,
+                actor_user_id=current_user.id,
+                transaction_type="initial",
+                quantity=initial_stock,
+                reason="Initial stock on product creation",
+            ))
+        audit_log("product_created", "product", p.id, {"stock": initial_stock})
         db.session.commit()
         flash("Product created.", "success")
         return redirect(url_for("admin.products"))
@@ -192,11 +204,24 @@ def product_edit(pid):
     if request.method == "GET":
         form.is_active.data = "yes" if p.is_active else "no"
     if form.validate_on_submit():
+        old_stock = int(p.stock or 0)
+        new_stock = max(0, int(form.stock.data or 0))
         p.name = form.name.data
         p.slug = slugify(form.name.data)
         p.description = form.description.data
         p.price = form.price.data
-        p.stock = form.stock.data
+        p.stock = new_stock
+        if new_stock != old_stock:
+            delta = new_stock - old_stock
+            db.session.add(InventoryTransaction(
+                product_id=p.id,
+                actor_user_id=current_user.id,
+                transaction_type="admin_adjustment",
+                quantity=delta,
+                reason=f"Admin stock adjustment from {old_stock} to {new_stock}",
+            ))
+            audit_log("product_stock_adjustment", "product", p.id,
+                      {"from": old_stock, "to": new_stock, "delta": delta})
         p.condition = form.condition.data
         p.category_id = form.category_id.data
         p.is_active = (form.is_active.data == "yes")
@@ -229,7 +254,13 @@ def order_status(oid, status):
             flash("Cancelled orders cannot be reopened. Ask the customer to place a new order.", "warning")
             return redirect(url_for("admin.orders"))
         if status == "cancelled" and o.status != "cancelled":
-            restore_order_stock(o)          # give the reserved stock back
+            if o.payment_status in ("paid", "manual", "review") or o.status in ("paid", "shipped", "delivered"):
+                flash("Paid or fulfilled orders require a separate refund/return review; they cannot be cancelled here.", "warning")
+                return redirect(url_for("admin.orders"))
+            restore_order_stock(
+                o,
+                reason=f"Order cancelled by admin {current_user.email}",
+            )
         if status == "paid" and o.payment_status != "paid":
             o.payment_status = "manual"     # marked paid by hand (e.g. bank transfer / cash)
         current_app.logger.info("AUDIT order %s: %s -> %s by admin %s", o.reference, o.status, status, current_user.email)
