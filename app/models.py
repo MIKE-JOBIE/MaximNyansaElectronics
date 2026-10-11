@@ -2,6 +2,7 @@ from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from .extensions import db
+from sqlalchemy import Index, UniqueConstraint
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -228,17 +229,22 @@ class AuditLog(db.Model):
 class PaymentTransaction(db.Model):
     """Immutable audit record for a verified payment-provider transaction."""
     __tablename__ = "payment_transactions"
+    __table_args__ = (
+        UniqueConstraint("provider_reference", name="uq_payment_transactions_provider_reference"),
+        UniqueConstraint("event_id", name="uq_payment_transactions_event_id"),
+        Index("ix_payment_transactions_provider_reference", "provider_reference"),
+    )
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id", ondelete="SET NULL"), nullable=True, index=True)
     donation_id = db.Column(db.Integer, db.ForeignKey("donations.id", ondelete="SET NULL"), nullable=True, index=True)
     provider = db.Column(db.String(40), nullable=False, default="paystack", server_default="paystack")
-    provider_reference = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    provider_reference = db.Column(db.String(120), nullable=False)
     amount = db.Column(db.Numeric(12, 2), nullable=False)
     currency = db.Column(db.String(5), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="success", server_default="success")
-    event_id = db.Column(db.String(160), nullable=True, unique=True)
+    event_id = db.Column(db.String(160), nullable=True)
     verified_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
 
 
 class InventoryTransaction(db.Model):
