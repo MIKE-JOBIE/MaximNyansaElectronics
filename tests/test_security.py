@@ -104,18 +104,26 @@ def test_webhook_rejects_bad_signature(client, monkeypatch):
 
 def test_webhook_marks_order_paid_only_when_amount_matches(app, client, monkeypatch):
     monkeypatch.setenv("PAYSTACK_SECRET_KEY", "sk_test_dummy")
-    o = _order(total=25)
-    wrong = {"event": "charge.success", "data": {"status": "success", "reference": o.reference, "amount": 100, "currency": "NGN"}}
+    wrong_order = _order(total=25)
+    wrong = {"event": "charge.success", "data": {"status": "success", "reference": wrong_order.reference, "amount": 100, "currency": "NGN"}}
+    verified = {wrong_order.reference: wrong["data"]}
+    monkeypatch.setattr("app.blueprints.shop.verify_transaction", lambda ref: verified.get(ref))
     body, sig = _signed(wrong, "sk_test_dummy")
     assert client.post("/shop/webhook/paystack", data=body, headers={"x-paystack-signature": sig}).status_code == 200
-    db.session.refresh(o)
-    assert o.payment_status != "paid"            # underpayment is NOT accepted
+    db.session.refresh(wrong_order)
+    assert wrong_order.payment_status == "review"  # underpayment is not accepted and is audited
 
-    right = {"event": "charge.success", "data": {"status": "success", "reference": o.reference, "amount": 2500, "currency": "NGN"}}
+    right_order = Order(user_id=wrong_order.user_id, total=25, status="pending",
+                        reference="MN-TEST0002", full_name="Ada", phone="1",
+                        address="x", payment_status="unpaid")
+    db.session.add(right_order)
+    db.session.commit()
+    right = {"event": "charge.success", "data": {"status": "success", "reference": right_order.reference, "amount": 2500, "currency": "NGN"}}
+    verified[right_order.reference] = right["data"]
     body, sig = _signed(right, "sk_test_dummy")
-    client.post("/shop/webhook/paystack", data=body, headers={"x-paystack-signature": sig})
-    db.session.refresh(o)
-    assert o.payment_status == "paid"
+    assert client.post("/shop/webhook/paystack", data=body, headers={"x-paystack-signature": sig}).status_code == 200
+    db.session.refresh(right_order)
+    assert right_order.payment_status == "paid"
 
 
 def test_apply_to_closed_program_is_rejected(app, client):
