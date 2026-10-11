@@ -121,7 +121,7 @@ def test_webhook_marks_order_paid_only_when_amount_matches(app, client, monkeypa
     right = {"event": "charge.success", "data": {"status": "success", "reference": right_order.reference, "amount": 2500, "currency": "NGN"}}
     verified[right_order.reference] = right["data"]
     body, sig = _signed(right, "sk_test_dummy")
-    assert client.post("/shop/webhook/paystack", data=body, headers={"x-paystack-signature": sig}).status_code == 200
+    assert client.post("/shop/webhook/paystack", data=body, content_type="application/json", headers={"x-paystack-signature": sig}).status_code == 200
     db.session.refresh(right_order)
     assert right_order.payment_status == "paid"
 
