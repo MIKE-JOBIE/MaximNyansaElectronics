@@ -11,3 +11,5 @@ app/static/uploads/*
 test_smtp.py
 app/test_smtp.py
 backups/
+
+.venv/
